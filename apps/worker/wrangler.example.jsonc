@@ -1,0 +1,65 @@
+// Template. Copy to wrangler.jsonc (git-ignored) and fill in routes + the two Access vars.
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "multicloud",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // The built web UI (npm run build -w apps/web). run_worker_first: EVERY request, static assets
+  // included, runs the Worker first, so the Cloudflare Access check covers the UI as well as /api/*.
+  "assets": {
+    "directory": "../web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": true
+  },
+
+  // Only reachable through the custom domain below (behind Cloudflare Access): no *.workers.dev
+  // URL, no preview URLs.
+  "workers_dev": false,
+  "preview_urls": false,
+
+  // Custom domain (a zone active on your Cloudflare account). Cloudflare creates the DNS record
+  // and certificate. Uncomment and set your own hostname.
+  // "routes": [{ "pattern": "cloud.your-domain.com", "custom_domain": true }],
+
+  // Cloudflare Access. NOT secrets: the team domain (<team>.cloudflareaccess.com) and the
+  // application's Audience (AUD) tag. While either is empty the Worker answers 403 to everything
+  // (fail closed). Set them HERE, in this file (they are not secret); do not also create secrets
+  // with these names.
+  "vars": {
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": ""
+  },
+  // Secrets (wrangler secret put, never in this file): GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
+  // MULTICLOUD_MASTER_KEY (base64 of 32 random bytes).
+  // DEV_AUTH_BYPASS must NEVER be declared here or in any env block: it belongs in .dev.vars only.
+
+  "durable_objects": {
+    "bindings": [{ "name": "CORE", "class_name": "MultiCloudCore" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["MultiCloudCore"] }],
+
+  "limits": {
+    // Paid default is 10,000 per invocation. 8,000 is an explicit ceiling below it; the alarm loop
+    // budgets 7,500 for transfer work per run (src/hostDeps.ts) and keeps 500 for token refreshes,
+    // the permission sweep and calls already in flight when the run stops starting items.
+    "subrequests": 8000,
+    // Guard against runaway CPU (default 30 s). A 10-minute alarm run is mostly I/O wait, but
+    // streaming up to 2 GiB through the stream fallback costs real CPU; 2 minutes covers that.
+    "cpu_ms": 120000
+  },
+
+  // Workers Logs: custom console logs only (the code never logs tokens, codes or query strings).
+  // Invocation logs are OFF: they record "<METHOD> <URL>" of every request
+  // (developers.cloudflare.com/workers/observability/logs/workers-logs/#invocation-logs), and the
+  // OAuth callback URL carries the authorization code and state in its query string.
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": {
+      "invocation_logs": false
+    }
+  }
+}

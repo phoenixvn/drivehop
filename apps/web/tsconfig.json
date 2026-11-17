@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    // "node" is listed only so the type-only `node:stream` import inside @multicloud/shared resolves.
+    "types": ["node", "vite/client"]
+  },
+  "include": ["src"]
+}

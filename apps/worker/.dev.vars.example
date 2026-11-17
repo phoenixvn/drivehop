@@ -1,0 +1,22 @@
+# Local development only: copy to apps/worker/.dev.vars (git-ignored) and fill in.
+# In production these are Worker SECRETS (`wrangler secret put <NAME>`), never committed.
+
+# Google OAuth "Web application" client. Add http://127.0.0.1:8799/api/auth/google/callback as an
+# authorised redirect URI for local development (production: https://<your-host>/api/auth/google/callback).
+GOOGLE_CLIENT_ID=replace-me.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=replace-me
+
+# 32 random bytes, base64. Generate with:
+#   node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
+# Use a throwaway key for local development; NEVER reuse the production key here.
+MULTICLOUD_MASTER_KEY=replace-me-with-base64-of-32-random-bytes
+
+# Cloudflare Access. Leave EMPTY locally (Access is not in front of wrangler dev). In production they
+# are set as vars in wrangler.jsonc; while empty the deployed Worker refuses every request.
+ACCESS_TEAM_DOMAIN=
+ACCESS_AUD=
+
+# !!! LOCAL ONLY !!! Skips the Cloudflare Access check. Honoured only when it is exactly "true",
+# ACCESS_TEAM_DOMAIN and ACCESS_AUD are empty, AND the request URL host is 127.0.0.1 or localhost.
+# Never put this in wrangler.jsonc, an [env] block, or a `wrangler secret`.
+DEV_AUTH_BYPASS=true

@@ -1,0 +1,25 @@
+{
+  // @multicloud/shared is consumed FROM SOURCE: its package.json "exports" points at ./src/index.ts,
+  // so there is no build step, no project references and no "paths" mapping. tsc (noEmit), tsx,
+  // Vitest and Vite all load the .ts files directly through the npm-workspace symlink.
+  // Consequences: relative imports carry an explicit ".ts"/".tsx" extension, only erasable TS syntax
+  // is allowed (no enums / parameter properties), and the server runs via tsx (its "build" is a type-check).
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["es2023"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"]
+  }
+}

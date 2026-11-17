@@ -1,0 +1,6 @@
+# Local secrets for `wrangler dev` (only .dev.vars.example is committed).
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+# Wrangler's local state (Miniflare storage, build output).
+.wrangler/

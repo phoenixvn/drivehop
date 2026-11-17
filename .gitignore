@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.sqlite*
+data/
+coverage/
+*.tsbuildinfo
+*.log
+
+# Cloudflare Wrangler local state and local Worker secrets (.dev.vars.example stays committed)
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# Personal deploy config (domain, Access team + AUD). Template: apps/worker/wrangler.example.jsonc
+apps/worker/wrangler.jsonc
+# Internal brief for the blog post
+docs/blog-assets/BRIEF.md
