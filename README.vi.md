@@ -1,6 +1,23 @@
+<div align="center">
+
+<img src="docs/logo.svg" alt="DriveHop" width="72" height="72">
+
 # DriveHop
 
+### Drive đầy rồi, tài khoản kia còn trống? Chuyển qua trong một nốt nhạc.
+
+<p>
+  <a href="https://github.com/phoenixvn/drivehop/releases/latest"><img src="https://img.shields.io/github/v/release/phoenixvn/drivehop?style=flat-square" alt="GitHub release"></a>
+  <a href="https://github.com/phoenixvn/drivehop/stargazers"><img src="https://img.shields.io/github/stars/phoenixvn/drivehop?style=flat-square" alt="GitHub stars"></a>
+  <a href="https://github.com/phoenixvn/drivehop/releases"><img src="https://img.shields.io/github/downloads/phoenixvn/drivehop/total?style=flat-square" alt="Downloads"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License: MIT"></a>
+</p>
+
+**[⬇ Tải bản Windows](https://github.com/phoenixvn/drivehop/releases/latest)** · [Báo lỗi](https://github.com/phoenixvn/drivehop/issues/new/choose) · [Hỏi đáp](https://github.com/phoenixvn/drivehop/discussions)
+
 [English](README.md) · **Tiếng Việt**
+
+</div>
 
 Bảng điều khiển để quản lý nhiều tài khoản Google Drive cùng lúc và sao chép hoặc di chuyển tệp, thư mục giữa các tài khoản bằng cách kéo thả.
 
@@ -1289,3 +1306,11 @@ Chưa đối chiếu được, hoặc còn chưa chắc:
 - Gói Workers Free có từ chối các thiết lập `limits` của dự án hay không (README yêu cầu gói Paid).
 - Các bước tạo OAuth client trên Google Cloud Console ở [mục 5](#5-thiết-lập-google-cloud) được giữ từ bản README trước; lần này chỉ đối chiếu lại việc client loại **Web application** có nhiều redirect URI và quy tắc `https`/localhost.
 - Nhãn trong dashboard Cloudflare và Google Cloud Console có thể khác với tài liệu.
+
+---
+
+## Ủng hộ dự án
+
+Nếu DriveHop giúp bạn khỏi phải mua thêm dung lượng, hãy tặng repo một ⭐ để người khác dễ tìm thấy. Muốn tài trợ (đặt logo trong README)? [Liên hệ ở đây](https://github.com/phoenixvn/drivehop/issues/new?template=sponsorship.yml).
+
+[![Star History Chart](https://api.star-history.com/svg?repos=phoenixvn/drivehop&type=Date)](https://star-history.com/#phoenixvn/drivehop&Date)

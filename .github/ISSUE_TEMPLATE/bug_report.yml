@@ -1,0 +1,48 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! **Never paste your Client secret, tokens, email addresses or private file names.** Replace them with placeholders.
+  - type: input
+    id: version
+    attributes:
+      label: DriveHop version
+      placeholder: v0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: How do you run it?
+      options:
+        - Windows app (DriveHop.exe)
+        - From source (Node)
+        - Cloudflare Worker
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: Windows 11 23H2
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (from the console window, with private data removed)
+      render: text

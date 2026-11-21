@@ -1,0 +1,23 @@
+name: Sponsorship / partnership
+description: Put your product in front of DriveHop users
+labels: [sponsorship]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your interest in sponsoring DriveHop! Tell us a little about you; the maintainer will reply here.
+  - type: input
+    id: company
+    attributes:
+      label: Company / product
+    validations:
+      required: true
+  - type: input
+    id: website
+    attributes:
+      label: Website
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to sponsor?
+      description: For example a logo in the README, a mention in release notes, or a feature.
