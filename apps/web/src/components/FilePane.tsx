@@ -4,7 +4,75 @@ import { ROOT_FOLDER_ID } from '@multicloud/shared';
 import type { AccountWithQuota, FileEntry, TransferMode } from '@multicloud/shared';
 import { ROOT_LABEL } from '../hooks/usePane.ts';
 import type { PaneState } from '../hooks/usePane.ts';
-import { fileKind, formatBytes, formatDate } from '../lib/format.ts';
+import { fileKind, formatBytes, formatCount, formatDate } from '../lib/format.ts';
+import { strings } from '../lib/i18n.ts';
+
+const S = strings({
+  en: {
+    noAccounts: 'No accounts yet',
+    needsReconnect: ' (needs reconnecting)',
+    refreshing: 'Refreshing…',
+    refresh: 'Refresh',
+    breadcrumbLabel: (label: string) => `Folder path, ${label}`,
+    selected: (n: number) => `${formatCount(n)} selected`,
+    count: (n: number) => `${formatCount(n)} ${n === 1 ? 'item' : 'items'}`,
+    hasMore: ' (more available)',
+    copyToOther: 'Copy to other side',
+    moveToOther: 'Move to other side',
+    addAccountHint: 'Add a Google account on the “Overview” page to browse files.',
+    loadingFiles: 'Loading files…',
+    folderLoadFailed: "Couldn't load this folder.",
+    reconnectHint: 'Open the “Overview” page and click “Reconnect” for',
+    retry: 'Retry',
+    emptyFolder: 'This folder is empty. You can drag files here from the other pane.',
+    filesIn: (path: string) => `Files in ${path}`,
+    selectAll: 'Select all',
+    name: 'Name',
+    size: 'Size',
+    modified: 'Modified',
+    selectItem: (name: string) => `Select ${name}`,
+    openFolder: (name: string) => `Open folder ${name}`,
+    nativeTag:
+      "Google file (Docs/Sheets/Slides): can only be copied with Drive's own copy, which may fail between two accounts.",
+    nativeHint:
+      "* Google files (Docs/Sheets/Slides) have no binary content: they can only be copied with Drive's own copy, which may fail between two accounts.",
+    loadMoreFailed: "Couldn't load more.",
+    loading: 'Loading…',
+    loadMore: 'Load more',
+  },
+  vi: {
+    noAccounts: 'Chưa có tài khoản',
+    needsReconnect: ' (cần kết nối lại)',
+    refreshing: 'Đang làm mới…',
+    refresh: 'Làm mới',
+    breadcrumbLabel: (label: string) => `Đường dẫn thư mục, ${label}`,
+    selected: (n: number) => `Đã chọn ${n} mục`,
+    count: (n: number) => `${n} mục`,
+    hasMore: ' (còn nữa)',
+    copyToOther: 'Sao chép sang bên kia',
+    moveToOther: 'Di chuyển sang bên kia',
+    addAccountHint: 'Hãy thêm tài khoản Google ở trang “Tổng quan” để duyệt tệp.',
+    loadingFiles: 'Đang tải danh sách tệp…',
+    folderLoadFailed: 'Không tải được thư mục này.',
+    reconnectHint: 'Mở trang “Tổng quan” và bấm “Kết nối lại” cho tài khoản',
+    retry: 'Thử lại',
+    emptyFolder: 'Thư mục này trống. Bạn có thể kéo tệp từ ngăn bên kia thả vào đây.',
+    filesIn: (path: string) => `Tệp trong ${path}`,
+    selectAll: 'Chọn tất cả',
+    name: 'Tên',
+    size: 'Kích thước',
+    modified: 'Sửa đổi',
+    selectItem: (name: string) => `Chọn ${name}`,
+    openFolder: (name: string) => `Mở thư mục ${name}`,
+    nativeTag:
+      'Tệp Google (Docs/Sheets/Slides): chỉ sao chép được bằng chức năng sao chép của chính Drive và có thể thất bại giữa hai tài khoản.',
+    nativeHint:
+      '* Tệp Google (Docs/Sheets/Slides) không có nội dung nhị phân: chỉ sao chép được bằng chức năng sao chép của chính Drive và có thể thất bại khi chuyển giữa hai tài khoản.',
+    loadMoreFailed: 'Không tải thêm được.',
+    loading: 'Đang tải…',
+    loadMore: 'Tải thêm',
+  },
+});
 
 /** Custom drag type: lets drop targets recognise our own drags without reading the data. */
 export const DRAG_MIME = 'application/x-multicloud-items';
@@ -18,7 +86,7 @@ interface FilePaneProps {
   label: string;
   pane: PaneState;
   accounts: readonly AccountWithQuota[];
-  /** Why the "sang bên kia" buttons are unavailable, or null when they can be used. */
+  /** Why the "to the other side" buttons are unavailable, or null when they can be used. */
   transferBlockedReason: string | null;
   onTransferSelection: (mode: TransferMode) => void;
   onDragStartItems: (items: FileEntry[]) => void;
@@ -222,11 +290,11 @@ export function FilePane({
             onChange={(event) => pane.setAccount(event.target.value)}
             disabled={accounts.length === 0}
           >
-            {accounts.length === 0 && <option value="">Chưa có tài khoản</option>}
+            {accounts.length === 0 && <option value="">{S.noAccounts}</option>}
             {accounts.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.email}
-                {option.status === 'needs_reconnect' ? ' (cần kết nối lại)' : ''}
+                {option.status === 'needs_reconnect' ? S.needsReconnect : ''}
               </option>
             ))}
           </select>
@@ -236,11 +304,11 @@ export function FilePane({
             onClick={pane.refresh}
             disabled={pane.accountId === null || pane.loadState === 'loading' || pane.refreshing}
           >
-            {pane.refreshing ? 'Đang làm mới…' : 'Làm mới'}
+            {pane.refreshing ? S.refreshing : S.refresh}
           </button>
         </div>
 
-        <nav aria-label={`Đường dẫn thư mục, ${label}`}>
+        <nav aria-label={S.breadcrumbLabel(label)}>
           <ol className="crumbs">
             {crumbs.map((crumb, index) => {
               const isLast = index === crumbs.length - 1;
@@ -269,8 +337,8 @@ export function FilePane({
         <div className="pane__toolbar">
           <span className="muted small" role="status">
             {selectedEntries.length > 0
-              ? `Đã chọn ${selectedEntries.length} mục${selectedBytes > 0 ? ` (${formatBytes(selectedBytes)})` : ''}`
-              : `${entries.length} mục${pane.hasMore ? ' (còn nữa)' : ''}`}
+              ? `${S.selected(selectedEntries.length)}${selectedBytes > 0 ? ` (${formatBytes(selectedBytes)})` : ''}`
+              : `${S.count(entries.length)}${pane.hasMore ? S.hasMore : ''}`}
           </span>
           <div className="pane__toolbar-buttons">
             <button
@@ -280,7 +348,7 @@ export function FilePane({
               title={transferBlockedReason ?? undefined}
               onClick={() => onTransferSelection('copy')}
             >
-              Sao chép sang bên kia
+              {S.copyToOther}
             </button>
             <button
               type="button"
@@ -289,7 +357,7 @@ export function FilePane({
               title={transferBlockedReason ?? undefined}
               onClick={() => onTransferSelection('move')}
             >
-              Di chuyển sang bên kia
+              {S.moveToOther}
             </button>
           </div>
         </div>
@@ -297,29 +365,29 @@ export function FilePane({
 
       <div className="pane__body">
         {pane.accountId === null && (
-          <p className="state">Hãy thêm tài khoản Google ở trang “Tổng quan” để duyệt tệp.</p>
+          <p className="state">{S.addAccountHint}</p>
         )}
         {pane.loadState === 'loading' && (
           <p className="state" role="status">
-            Đang tải danh sách tệp…
+            {S.loadingFiles}
           </p>
         )}
         {pane.loadState === 'error' && (
           <div className="state state--error" role="alert">
-            <p>Không tải được thư mục này. {pane.error}</p>
+            <p>{S.folderLoadFailed} {pane.error}</p>
             {pane.needsReconnect && (
               <p>
-                Mở trang “Tổng quan” và bấm “Kết nối lại” cho tài khoản{' '}
+                {S.reconnectHint}{' '}
                 <strong>{account?.email}</strong>.
               </p>
             )}
             <button type="button" className="button" onClick={pane.refresh}>
-              Thử lại
+              {S.retry}
             </button>
           </div>
         )}
         {pane.loadState === 'ready' && entries.length === 0 && (
-          <p className="state">Thư mục này trống. Bạn có thể kéo tệp từ ngăn bên kia thả vào đây.</p>
+          <p className="state">{S.emptyFolder}</p>
         )}
 
         {pane.loadState === 'ready' && entries.length > 0 && (
@@ -328,7 +396,9 @@ export function FilePane({
               className="files"
               role="grid"
               aria-multiselectable="true"
-              aria-label={`Tệp trong ${crumbs.map((crumb, index) => (index === 0 ? ROOT_LABEL : crumb.name)).join(' / ')}`}
+              aria-label={S.filesIn(
+                crumbs.map((crumb, index) => (index === 0 ? ROOT_LABEL : crumb.name)).join(' / '),
+              )}
               aria-describedby={hasNative ? hintId : undefined}
             >
               <thead>
@@ -337,7 +407,7 @@ export function FilePane({
                     <input
                       ref={selectAllRef}
                       type="checkbox"
-                      aria-label="Chọn tất cả"
+                      aria-label={S.selectAll}
                       checked={allSelected}
                       onChange={() =>
                         pane.setSelectedIds(
@@ -346,12 +416,12 @@ export function FilePane({
                       }
                     />
                   </th>
-                  <th scope="col">Tên</th>
+                  <th scope="col">{S.name}</th>
                   <th scope="col" className="files__size">
-                    Kích thước
+                    {S.size}
                   </th>
                   <th scope="col" className="files__date">
-                    Sửa đổi
+                    {S.modified}
                   </th>
                 </tr>
               </thead>
@@ -392,7 +462,7 @@ export function FilePane({
                         <input
                           type="checkbox"
                           tabIndex={-1}
-                          aria-label={`Chọn ${entry.name}`}
+                          aria-label={S.selectItem(entry.name)}
                           checked={selected}
                           onClick={(event) => event.stopPropagation()}
                           onChange={() => toggle(entry)}
@@ -410,7 +480,7 @@ export function FilePane({
                               className="link-button files__open"
                               tabIndex={-1}
                               title={entry.name}
-                              aria-label={`Mở thư mục ${entry.name}`}
+                              aria-label={S.openFolder(entry.name)}
                               onClick={(event) => {
                                 event.stopPropagation();
                                 pane.openFolder(entry.id);
@@ -425,7 +495,7 @@ export function FilePane({
                           {entry.isGoogleNative && (
                             <span
                               className="tag"
-                              title="Tệp Google (Docs/Sheets/Slides): chỉ sao chép được bằng chức năng sao chép của chính Drive và có thể thất bại giữa hai tài khoản."
+                              title={S.nativeTag}
                             >
                               {kind.label}*
                             </span>
@@ -445,14 +515,13 @@ export function FilePane({
 
             {hasNative && (
               <p id={hintId} className="hint small">
-                * Tệp Google (Docs/Sheets/Slides) không có nội dung nhị phân: chỉ sao chép được bằng
-                chức năng sao chép của chính Drive và có thể thất bại khi chuyển giữa hai tài khoản.
+                {S.nativeHint}
               </p>
             )}
 
             {pane.loadMoreError && (
               <p className="error-text" role="alert">
-                Không tải thêm được. {pane.loadMoreError}
+                {S.loadMoreFailed} {pane.loadMoreError}
               </p>
             )}
             {pane.hasMore && (
@@ -463,7 +532,7 @@ export function FilePane({
                   onClick={pane.loadMore}
                   disabled={pane.loadingMore}
                 >
-                  {pane.loadingMore ? 'Đang tải…' : 'Tải thêm'}
+                  {pane.loadingMore ? S.loading : S.loadMore}
                 </button>
               </div>
             )}

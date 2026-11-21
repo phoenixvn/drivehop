@@ -19,6 +19,10 @@
 
 </div>
 
+![Demo: tổng quan → chọn tệp → di chuyển → theo dõi tiến độ](docs/media/demo.gif)
+
+> Ảnh động quay ở chế độ demo (`?mock=1`), giao diện tiếng Anh; bấm **VI** ở góc phải để dùng tiếng Việt. Không có tài khoản hay tệp thật nào.
+
 Bảng điều khiển để quản lý nhiều tài khoản Google Drive cùng lúc và sao chép hoặc di chuyển tệp, thư mục giữa các tài khoản bằng cách kéo thả.
 
 Có hai cách chạy cùng một ứng dụng:

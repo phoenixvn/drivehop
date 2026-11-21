@@ -169,7 +169,7 @@ describe('HTTP requests', () => {
     stubFetch({ status: 401, ok: false, body: '{"code":"unauthorized","message":"no"}' });
     const error = await createHttpApiClient().listAccounts().catch((cause: unknown) => cause);
     expect(error).toMatchObject({ code: CLIENT_ERROR_CODES.sessionExpired });
-    expect(apiErrorText(error)).toContain('tải lại trang');
+    expect(apiErrorText(error)).toContain('Reload the page');
   });
 
   it('keeps the API own 401 needs_reconnect and 403 provider_error', async () => {

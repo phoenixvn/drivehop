@@ -10,7 +10,7 @@ export function notConfigured(missing: readonly string[]): HttpError {
   return new HttpError(
     503,
     API_ERROR_CODES.notConfigured,
-    `Máy chủ chưa được cấu hình. Thiếu biến môi trường: ${names}. Hãy nhập OAuth client ở màn hình thiết lập, hoặc thêm vào tệp .env rồi khởi động lại máy chủ.`,
+    `The server is not configured. Missing environment variables: ${names}. Enter your OAuth client on the setup screen, or add them to the .env file and restart the server.`,
   );
 }
 
@@ -19,6 +19,6 @@ export function tokenStorageUnavailable(): HttpError {
   return new HttpError(
     503,
     API_ERROR_CODES.notConfigured,
-    'Không thể lưu token an toàn: kho thông tin xác thực của hệ điều hành không dùng được và chưa đặt biến môi trường MULTICLOUD_MASTER_KEY (base64 của 32 byte ngẫu nhiên).',
+    'Cannot store tokens safely: the OS credential store is unavailable and MULTICLOUD_MASTER_KEY (base64 of 32 random bytes) is not set.',
   );
 }

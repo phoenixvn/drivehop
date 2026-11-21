@@ -11,14 +11,164 @@ import {
   apiErrorText,
   canRetryJob,
   formatBytes,
+  formatCount,
   formatDate,
   friendlyItemError,
   friendlyItemWarning,
   friendlyJobError,
   percent,
 } from '../lib/format.ts';
+import { strings } from '../lib/i18n.ts';
 import { Dialog } from './Dialog.tsx';
 import type { PushToast } from './Toasts.tsx';
+
+const items = (n: number): string => `${formatCount(n)} ${n === 1 ? 'item' : 'items'}`;
+
+const S = strings({
+  en: {
+    unknownSize: 'Unknown size',
+    verified: ' · Verified',
+    originalPurged: ' · Original deleted forever',
+    originalTrashed: ' · Original moved to trash',
+    note: 'Note:',
+    loadingItems: 'Loading items…',
+    itemsLoadFailed: "Couldn't load the items.",
+    retry: 'Retry',
+    noItems: 'No items.',
+    largeJob: (shown: number, omitted: number) =>
+      `Large job: showing only ${items(shown)} (the ones you selected, failed, running and those with a note come first); ${formatCount(omitted)} more ${omitted === 1 ? "isn't" : "aren't"} shown here.`,
+    cancelFailed: "Couldn't cancel the job.",
+    retryFailed: "Couldn't retry.",
+    purgeKept: (n: number) => `${items(n)} kept (see details)`,
+    purgeFailed: (n: number) => `${items(n)} couldn't be deleted yet, please retry`,
+    purgeDone: (n: number, email: string, extra: string) =>
+      `Deleted ${formatCount(n)} ${n === 1 ? 'original' : 'originals'} forever from ${email}.${extra} Google may take a few minutes to update storage.`,
+    to: ' to ',
+    progressLabel: (mode: string) => `${mode} progress`,
+    itemsProgress: (done: number, total: number) =>
+      `${formatCount(done)}/${formatCount(total)} ${total === 1 ? 'item' : 'items'}`,
+    failedItems: (n: number) => ` · ${formatCount(n)} failed`,
+    finished: (date: string) => ` · Finished ${date}`,
+    trashedNote: (n: number, email: string) => (
+      <>
+        {formatCount(n)} moved {n === 1 ? 'original is' : 'originals are'} in the{' '}
+        <strong>trash</strong> of {email} and{' '}
+        <strong>{n === 1 ? 'still uses' : 'still use'} storage</strong> until deleted forever
+        (Google empties the trash after 30 days).
+      </>
+    ),
+    hideDetails: 'Hide details',
+    showDetails: 'Show details',
+    canceling: 'Canceling…',
+    cancel: 'Cancel',
+    retryTitle: 'Re-run the failed or canceled items',
+    retrying: 'Retrying…',
+    purgeTitle: 'Delete the moved originals forever to free up space in the source account',
+    purgingForever: 'Deleting forever…',
+    freeUpSpace: 'Free up space',
+    purgeDialogTitle: 'Delete originals forever?',
+    back: 'Back',
+    deleting: 'Deleting…',
+    deleteForeverN: (n: number) => `Delete ${items(n)} forever`,
+    purgeIntro: (n: number, email: string) => (
+      <>
+        You're about to{' '}
+        <strong>
+          delete forever {formatCount(n)} original {n === 1 ? 'item' : 'items'}
+        </strong>{' '}
+        that this job moved to the trash of <strong>{email}</strong>, to free up space.
+      </>
+    ),
+    purgeCopiesSafe: (email: string) => (
+      <>
+        Their copies in <strong>{email}</strong> were verified and won't be touched.
+      </>
+    ),
+    purgeRecheck:
+      'Before deleting each item, DriveHop checks again: the copy in the destination must still exist, and the original must still be in the trash (items you restored are kept).',
+    purgeOthers: 'Anything else in the trash (not moved there by this job) is left alone.',
+    irreversibleLabel: "Can't be undone:",
+    irreversibleText: " once deleted, the originals can't be recovered.",
+    deletedAccount: (id: string) => `Deleted account (${id})`,
+    title: 'Transfers',
+    closeLabel: 'Close transfers panel',
+    liveLost:
+      'Lost the live update connection, trying to reconnect (the list still reloads periodically)…',
+    reloadList: 'Reload list',
+    loadingJobs: 'Loading jobs…',
+    jobsLoadFailed: "Couldn't load jobs.",
+    noJobs: 'No jobs yet. Drag files between the two panes in “File browser” to start.',
+  },
+  vi: {
+    unknownSize: 'Không rõ kích thước',
+    verified: ' · Đã kiểm tra',
+    originalPurged: ' · Bản gốc đã xóa vĩnh viễn',
+    originalTrashed: ' · Bản gốc đã vào thùng rác',
+    note: 'Lưu ý:',
+    loadingItems: 'Đang tải danh sách mục…',
+    itemsLoadFailed: 'Không tải được danh sách mục.',
+    retry: 'Thử lại',
+    noItems: 'Không có mục nào.',
+    largeJob: (shown: number, omitted: number) =>
+      `Tác vụ lớn: chỉ hiện ${shown} mục (các mục bạn chọn, mục lỗi, mục đang chạy và mục có lưu ý được ưu tiên); ${omitted} mục khác không hiện ở đây.`,
+    cancelFailed: 'Không hủy được tác vụ.',
+    retryFailed: 'Không thử lại được.',
+    purgeKept: (n: number) => `${n} mục được giữ lại (xem chi tiết)`,
+    purgeFailed: (n: number) => `${n} mục chưa xóa được, hãy thử lại`,
+    purgeDone: (n: number, email: string, extra: string) =>
+      `Đã xóa vĩnh viễn ${n} bản gốc khỏi ${email}.${extra} Google có thể cần vài phút để cập nhật dung lượng.`,
+    to: ' sang ',
+    progressLabel: (mode: string) => `Tiến độ ${mode.toLowerCase()}`,
+    itemsProgress: (done: number, total: number) => `${done}/${total} mục`,
+    failedItems: (n: number) => ` · ${n} mục lỗi`,
+    finished: (date: string) => ` · Kết thúc ${date}`,
+    trashedNote: (n: number, email: string) => (
+      <>
+        {n} mục gốc đã chuyển xong đang nằm trong <strong>thùng rác</strong> của {email} và{' '}
+        <strong>vẫn chiếm dung lượng</strong> cho tới khi bị xóa vĩnh viễn (Google tự xóa sau 30
+        ngày).
+      </>
+    ),
+    hideDetails: 'Ẩn chi tiết',
+    showDetails: 'Xem chi tiết',
+    canceling: 'Đang hủy…',
+    cancel: 'Hủy',
+    retryTitle: 'Chạy lại các mục bị lỗi hoặc đã hủy',
+    retrying: 'Đang thử lại…',
+    purgeTitle: 'Xóa vĩnh viễn các bản gốc đã chuyển xong để giải phóng dung lượng tài khoản nguồn',
+    purgingForever: 'Đang xóa vĩnh viễn…',
+    freeUpSpace: 'Giải phóng dung lượng',
+    purgeDialogTitle: 'Xóa vĩnh viễn bản gốc?',
+    back: 'Quay lại',
+    deleting: 'Đang xóa…',
+    deleteForeverN: (n: number) => `Xóa vĩnh viễn ${n} mục`,
+    purgeIntro: (n: number, email: string) => (
+      <>
+        Bạn sắp <strong>xóa vĩnh viễn {n} mục gốc</strong> mà tác vụ này đã chuyển vào thùng rác
+        của <strong>{email}</strong>, để giải phóng dung lượng.
+      </>
+    ),
+    purgeCopiesSafe: (email: string) => (
+      <>
+        Bản sao của chúng ở <strong>{email}</strong> đã được kiểm tra và không bị đụng tới.
+      </>
+    ),
+    purgeRecheck:
+      'Trước khi xóa từng mục, DriveHop kiểm tra lại: bản sao ở đích phải còn, và bản gốc phải vẫn nằm trong thùng rác (mục bạn đã khôi phục sẽ được giữ nguyên).',
+    purgeOthers: 'Các thứ khác trong thùng rác (không do tác vụ này chuyển vào) không bị đụng tới.',
+    irreversibleLabel: 'Không thể hoàn tác:',
+    irreversibleText: ' sau khi xóa, bản gốc không khôi phục được nữa.',
+    deletedAccount: (id: string) => `Tài khoản đã xóa (${id})`,
+    title: 'Chuyển tệp',
+    closeLabel: 'Đóng bảng chuyển tệp',
+    liveLost:
+      'Mất kết nối cập nhật trực tiếp, đang thử kết nối lại (danh sách vẫn được tải lại định kỳ)…',
+    reloadList: 'Tải lại danh sách',
+    loadingJobs: 'Đang tải danh sách tác vụ…',
+    jobsLoadFailed: 'Không tải được danh sách tác vụ.',
+    noJobs: 'Chưa có tác vụ nào. Kéo tệp giữa hai ngăn trong “Trình duyệt tệp” để bắt đầu.',
+  },
+});
 
 interface TransfersDrawerProps {
   transfers: TransfersState;
@@ -43,13 +193,9 @@ function ItemRow({ item }: { item: TransferItem }) {
         </span>
       </div>
       <div className="job-item__meta small muted">
-        {item.sizeBytes > 0 ? formatBytes(item.sizeBytes) : 'Không rõ kích thước'}
-        {item.status === 'done' && item.verified ? ' · Đã kiểm tra' : ''}
-        {item.sourcePurged
-          ? ' · Bản gốc đã xóa vĩnh viễn'
-          : item.sourceTrashed
-            ? ' · Bản gốc đã vào thùng rác'
-            : ''}
+        {item.sizeBytes > 0 ? formatBytes(item.sizeBytes) : S.unknownSize}
+        {item.status === 'done' && item.verified ? S.verified : ''}
+        {item.sourcePurged ? S.originalPurged : item.sourceTrashed ? S.originalTrashed : ''}
       </div>
       {error && (
         <p className="job-item__error small">
@@ -59,7 +205,7 @@ function ItemRow({ item }: { item: TransferItem }) {
       )}
       {warning && (
         <p className="job-item__warning small">
-          <strong>Lưu ý:</strong> {warning.text}
+          <strong>{S.note}</strong> {warning.text}
           {warning.detail && <span className="job-item__detail"> ({warning.detail})</span>}
         </p>
       )}
@@ -71,27 +217,26 @@ function ItemList({ state, onRetryLoad }: { state: ItemsState | undefined; onRet
   if (!state || state.kind === 'loading') {
     return (
       <p className="muted small" role="status">
-        Đang tải danh sách mục…
+        {S.loadingItems}
       </p>
     );
   }
   if (state.kind === 'error') {
     return (
       <div className="small" role="alert">
-        <p className="error-text">Không tải được danh sách mục. {state.message}</p>
+        <p className="error-text">{S.itemsLoadFailed} {state.message}</p>
         <button type="button" className="button button--small" onClick={onRetryLoad}>
-          Thử lại
+          {S.retry}
         </button>
       </div>
     );
   }
-  if (state.items.length === 0) return <p className="muted small">Không có mục nào.</p>;
+  if (state.items.length === 0) return <p className="muted small">{S.noItems}</p>;
   return (
     <>
       {state.omitted !== undefined && (
         <p className="muted small">
-          Tác vụ lớn: chỉ hiện {state.items.length} mục (các mục bạn chọn, mục lỗi, mục đang chạy
-          và mục có lưu ý được ưu tiên); {state.omitted} mục khác không hiện ở đây.
+          {S.largeJob(state.items.length, state.omitted)}
         </p>
       )}
       <ul className="job-items">
@@ -148,7 +293,7 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
         setBusy(null);
         pushToast(
           'error',
-          `${action === 'cancel' ? 'Không hủy được tác vụ.' : 'Không thử lại được.'} ${apiErrorText(cause)}`,
+          `${action === 'cancel' ? S.cancelFailed : S.retryFailed} ${apiErrorText(cause)}`,
         );
       },
     );
@@ -181,12 +326,16 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
     setPurgeStep('idle');
     if (expanded) loadItems(job.id);
     const extra = [
-      skipped > 0 ? `${skipped} mục được giữ lại (xem chi tiết)` : '',
-      failed > 0 ? `${failed} mục chưa xóa được, hãy thử lại` : '',
+      skipped > 0 ? S.purgeKept(skipped) : '',
+      failed > 0 ? S.purgeFailed(failed) : '',
     ].filter(Boolean);
     pushToast(
       failed > 0 ? 'error' : 'success',
-      `Đã xóa vĩnh viễn ${purged} bản gốc khỏi ${emailOf(job.sourceAccountId)}.${extra.length > 0 ? ` ${extra.join('; ')}.` : ''} Google có thể cần vài phút để cập nhật dung lượng.`,
+      S.purgeDone(
+        purged,
+        emailOf(job.sourceAccountId),
+        extra.length > 0 ? ` ${extra.join('; ')}.` : '',
+      ),
     );
   };
 
@@ -208,7 +357,7 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
           {emailOf(job.sourceAccountId)}
         </span>
         <span aria-hidden="true"> → </span>
-        <span className="visually-hidden"> sang </span>
+        <span className="visually-hidden">{S.to}</span>
         <span className="job__email" title={emailOf(job.destAccountId)}>
           {emailOf(job.destAccountId)}
         </span>
@@ -216,7 +365,7 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
       <div
         className={`progress progress--job-${job.status}`}
         role="progressbar"
-        aria-label={`Tiến độ ${MODE_LABELS[job.mode].toLowerCase()}`}
+        aria-label={S.progressLabel(MODE_LABELS[job.mode])}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(progress)}
@@ -224,10 +373,10 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
         <div className="progress__bar" style={{ width: `${progress}%` }} />
       </div>
       <p className="small job__numbers">
-        {totals.done}/{totals.items} mục
+        {S.itemsProgress(totals.done, totals.items)}
         {byBytes ? ` · ${formatBytes(totals.bytesDone)} / ${formatBytes(totals.bytesTotal)}` : ''}
-        {totals.failed > 0 && <span className="error-text"> · {totals.failed} mục lỗi</span>}
-        {job.finishedAt ? ` · Kết thúc ${formatDate(job.finishedAt)}` : ''}
+        {totals.failed > 0 && <span className="error-text">{S.failedItems(totals.failed)}</span>}
+        {job.finishedAt ? S.finished(formatDate(job.finishedAt)) : ''}
       </p>
       {job.status === 'queued' && (
         <p className="job__queued small muted" role="status">
@@ -242,9 +391,7 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
       )}
       {canPurge && (
         <p className="job__reason small">
-          {trashedCount} mục gốc đã chuyển xong đang nằm trong <strong>thùng rác</strong> của{' '}
-          {emailOf(job.sourceAccountId)} và <strong>vẫn chiếm dung lượng</strong> cho tới khi bị xóa
-          vĩnh viễn (Google tự xóa sau 30 ngày).
+          {S.trashedNote(trashedCount, emailOf(job.sourceAccountId))}
         </p>
       )}
       <div className="job__actions">
@@ -255,7 +402,7 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
           aria-controls={itemsId}
           onClick={toggle}
         >
-          {expanded ? 'Ẩn chi tiết' : 'Xem chi tiết'}
+          {expanded ? S.hideDetails : S.showDetails}
         </button>
         {canCancel && (
           <button
@@ -264,7 +411,7 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
             onClick={() => run('cancel')}
             disabled={busy !== null}
           >
-            {busy === 'cancel' ? 'Đang hủy…' : 'Hủy'}
+            {busy === 'cancel' ? S.canceling : S.cancel}
           </button>
         )}
         {canRetry && (
@@ -273,9 +420,9 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
             className="button button--small"
             onClick={() => run('retry')}
             disabled={busy !== null}
-            title="Chạy lại các mục bị lỗi hoặc đã hủy"
+            title={S.retryTitle}
           >
-            {busy === 'retry' ? 'Đang thử lại…' : 'Thử lại'}
+            {busy === 'retry' ? S.retrying : S.retry}
           </button>
         )}
         {canPurge && (
@@ -287,15 +434,15 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
               setPurgeStep('confirm');
             }}
             disabled={busy !== null || purgeStep === 'running'}
-            title="Xóa vĩnh viễn các bản gốc đã chuyển xong để giải phóng dung lượng tài khoản nguồn"
+            title={S.purgeTitle}
           >
-            {purgeStep === 'running' ? 'Đang xóa vĩnh viễn…' : 'Giải phóng dung lượng'}
+            {purgeStep === 'running' ? S.purgingForever : S.freeUpSpace}
           </button>
         )}
       </div>
       {purgeStep !== 'idle' && (
         <Dialog
-          title="Xóa vĩnh viễn bản gốc?"
+          title={S.purgeDialogTitle}
           onClose={() => setPurgeStep('idle')}
           busy={purgeStep === 'running'}
           actions={
@@ -307,7 +454,7 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
                 disabled={purgeStep === 'running'}
                 data-autofocus
               >
-                Quay lại
+                {S.back}
               </button>
               <button
                 type="button"
@@ -315,28 +462,19 @@ function JobCard({ job, emailOf, itemsState, loadItems, applyJob, pushToast }: J
                 onClick={() => void purge()}
                 disabled={purgeStep === 'running'}
               >
-                {purgeStep === 'running' ? 'Đang xóa…' : `Xóa vĩnh viễn ${trashedCount} mục`}
+                {purgeStep === 'running' ? S.deleting : S.deleteForeverN(trashedCount)}
               </button>
             </>
           }
         >
-          <p>
-            Bạn sắp <strong>xóa vĩnh viễn {trashedCount} mục gốc</strong> mà tác vụ này đã chuyển
-            vào thùng rác của <strong>{emailOf(job.sourceAccountId)}</strong>, để giải phóng dung
-            lượng.
-          </p>
+          <p>{S.purgeIntro(trashedCount, emailOf(job.sourceAccountId))}</p>
           <ul className="plain-list">
+            <li>{S.purgeCopiesSafe(emailOf(job.destAccountId))}</li>
+            <li>{S.purgeRecheck}</li>
+            <li>{S.purgeOthers}</li>
             <li>
-              Bản sao của chúng ở <strong>{emailOf(job.destAccountId)}</strong> đã được kiểm tra và
-              không bị đụng tới.
-            </li>
-            <li>
-              Trước khi xóa từng mục, DriveHop kiểm tra lại: bản sao ở đích phải còn, và bản gốc
-              phải vẫn nằm trong thùng rác (mục bạn đã khôi phục sẽ được giữ nguyên).
-            </li>
-            <li>Các thứ khác trong thùng rác (không do tác vụ này chuyển vào) không bị đụng tới.</li>
-            <li>
-              <strong>Không thể hoàn tác:</strong> sau khi xóa, bản gốc không khôi phục được nữa.
+              <strong>{S.irreversibleLabel}</strong>
+              {S.irreversibleText}
             </li>
           </ul>
           {purgeError && (
@@ -361,7 +499,7 @@ export function TransfersDrawer({ transfers, accounts, onClose, pushToast }: Tra
   }, []);
 
   const emailOf = (accountId: string): string =>
-    accounts.find((account) => account.id === accountId)?.email ?? `Tài khoản đã xóa (${accountId})`;
+    accounts.find((account) => account.id === accountId)?.email ?? S.deletedAccount(accountId);
 
   return (
     <aside
@@ -376,18 +514,18 @@ export function TransfersDrawer({ transfers, accounts, onClose, pushToast }: Tra
     >
       <header className="drawer__header">
         <h2 id="drawer-title" ref={titleRef} tabIndex={-1}>
-          Chuyển tệp
+          {S.title}
         </h2>
-        <button type="button" className="icon-button" aria-label="Đóng bảng chuyển tệp" onClick={onClose}>
+        <button type="button" className="icon-button" aria-label={S.closeLabel} onClick={onClose}>
           ×
         </button>
       </header>
 
       {!transfers.live && transfers.loadState === 'ready' && (
         <p className="drawer__notice small" role="status">
-          Mất kết nối cập nhật trực tiếp, đang thử kết nối lại (danh sách vẫn được tải lại định kỳ)…{' '}
+          {S.liveLost}{' '}
           <button type="button" className="link-button" onClick={transfers.reload}>
-            Tải lại danh sách
+            {S.reloadList}
           </button>
         </p>
       )}
@@ -395,20 +533,20 @@ export function TransfersDrawer({ transfers, accounts, onClose, pushToast }: Tra
       <div className="drawer__body">
         {transfers.loadState === 'loading' && (
           <p className="state" role="status">
-            Đang tải danh sách tác vụ…
+            {S.loadingJobs}
           </p>
         )}
         {transfers.loadState === 'error' && (
           <div className="state state--error" role="alert">
-            <p>Không tải được danh sách tác vụ. {transfers.error}</p>
+            <p>{S.jobsLoadFailed} {transfers.error}</p>
             <button type="button" className="button" onClick={transfers.reload}>
-              Thử lại
+              {S.retry}
             </button>
           </div>
         )}
         {transfers.loadState === 'ready' && transfers.jobs.length === 0 && (
           <p className="state">
-            Chưa có tác vụ nào. Kéo tệp giữa hai ngăn trong “Trình duyệt tệp” để bắt đầu.
+            {S.noJobs}
           </p>
         )}
         {transfers.jobs.length > 0 && (

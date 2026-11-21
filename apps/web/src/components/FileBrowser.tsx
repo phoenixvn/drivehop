@@ -3,11 +3,44 @@ import type { AccountWithQuota, FileEntry, TransferJob, TransferMode } from '@mu
 import { useApi } from '../api/ApiContext.ts';
 import { ROOT_LABEL, usePane } from '../hooks/usePane.ts';
 import type { PaneState } from '../hooks/usePane.ts';
+import { strings } from '../lib/i18n.ts';
 import { FilePane } from './FilePane.tsx';
 import type { DropFolder } from './FilePane.tsx';
 import type { PushToast } from './Toasts.tsx';
 import { TransferDialog } from './TransferDialog.tsx';
 import type { TransferPlan } from './TransferDialog.tsx';
+
+const S = strings({
+  en: {
+    destNotReady:
+      "The destination pane isn't ready yet. Wait for the destination folder to finish loading, then try again.",
+    alreadyThere: 'The items are already in this folder, so there is nothing to transfer.',
+    intoItself: "A folder can't be transferred into itself or into one of its subfolders.",
+    otherNoAccount: 'No account is selected in the other pane.',
+    otherNotReady: "The other pane hasn't finished loading or has an error.",
+    sameFolder: 'Both panes show the same folder of the same account.',
+    leftPane: 'Left pane',
+    rightPane: 'Right pane',
+    title: 'File browser',
+    intro:
+      'Select items, then drag them to the other pane (or drop them on a folder) to copy or move them. Not using a mouse? Select with the Space bar, then use the “Copy to other side” / “Move to other side” buttons.',
+    noAccounts: 'No accounts yet. Open the “Overview” page and click “Add Google account”.',
+  },
+  vi: {
+    destNotReady: 'Ngăn đích chưa sẵn sàng. Hãy đợi thư mục đích tải xong rồi thử lại.',
+    alreadyThere: 'Các mục đã nằm sẵn trong thư mục này, không có gì để chuyển.',
+    intoItself: 'Không thể chuyển một thư mục vào chính nó hoặc vào thư mục con của nó.',
+    otherNoAccount: 'Ngăn bên kia chưa chọn tài khoản.',
+    otherNotReady: 'Ngăn bên kia chưa tải xong hoặc đang lỗi.',
+    sameFolder: 'Hai ngăn đang mở cùng một thư mục của cùng một tài khoản.',
+    leftPane: 'Ngăn trái',
+    rightPane: 'Ngăn phải',
+    title: 'Trình duyệt tệp',
+    intro:
+      'Chọn các mục rồi kéo sang ngăn bên kia (hoặc thả lên một thư mục) để sao chép hay di chuyển. Không dùng chuột? Chọn bằng phím cách, rồi dùng nút “Sao chép sang bên kia” / “Di chuyển sang bên kia”.',
+    noAccounts: 'Chưa có tài khoản nào. Hãy mở trang “Tổng quan” và bấm “Thêm tài khoản Google”.',
+  },
+});
 
 type Side = 'left' | 'right';
 
@@ -74,7 +107,7 @@ export function FileBrowser({
     const dest = paneOf(otherSide(sourceSide));
     if (items.length === 0 || source.accountId === null || dest.accountId === null) return;
     if (dest.loadState !== 'ready') {
-      pushToast('error', 'Ngăn đích chưa sẵn sàng. Hãy đợi thư mục đích tải xong rồi thử lại.');
+      pushToast('error', S.destNotReady);
       return;
     }
 
@@ -85,14 +118,14 @@ export function FileBrowser({
       const destIsSourceFolder =
         folder === null ? sameLocation(source, dest) : currentFolderIds(source).has(folder.id);
       if (destIsSourceFolder) {
-        pushToast('info', 'Các mục đã nằm sẵn trong thư mục này, không có gì để chuyển.');
+        pushToast('info', S.alreadyThere);
         return;
       }
       // A folder cannot go into itself or into one of its own subfolders.
       const destChain = [...dest.breadcrumbs.map((crumb) => crumb.id), dest.folderId];
       if (folder) destChain.push(folder.id);
       if (destChain.some((id) => itemIds.has(id))) {
-        pushToast('error', 'Không thể chuyển một thư mục vào chính nó hoặc vào thư mục con của nó.');
+        pushToast('error', S.intoItself);
         return;
       }
     }
@@ -112,9 +145,9 @@ export function FileBrowser({
   const blockedReason = (side: Side): string | null => {
     const source = paneOf(side);
     const dest = paneOf(otherSide(side));
-    if (dest.accountId === null) return 'Ngăn bên kia chưa chọn tài khoản.';
-    if (dest.loadState !== 'ready') return 'Ngăn bên kia chưa tải xong hoặc đang lỗi.';
-    if (sameLocation(source, dest)) return 'Hai ngăn đang mở cùng một thư mục của cùng một tài khoản.';
+    if (dest.accountId === null) return S.otherNoAccount;
+    if (dest.loadState !== 'ready') return S.otherNotReady;
+    if (sameLocation(source, dest)) return S.sameFolder;
     return null;
   };
 
@@ -122,7 +155,7 @@ export function FileBrowser({
     const pane = paneOf(side);
     return (
       <FilePane
-        label={side === 'left' ? 'Ngăn trái' : 'Ngăn phải'}
+        label={side === 'left' ? S.leftPane : S.rightPane}
         pane={pane}
         accounts={accounts}
         transferBlockedReason={blockedReason(side)}
@@ -156,19 +189,13 @@ export function FileBrowser({
     <section className="browser" aria-labelledby="browser-title">
       <div className="section-head">
         <div>
-          <h2 id="browser-title">Trình duyệt tệp</h2>
-          <p className="muted">
-            Chọn các mục rồi kéo sang ngăn bên kia (hoặc thả lên một thư mục) để sao chép hay di
-            chuyển. Không dùng chuột? Chọn bằng phím cách, rồi dùng nút “Sao chép sang bên kia” /
-            “Di chuyển sang bên kia”.
-          </p>
+          <h2 id="browser-title">{S.title}</h2>
+          <p className="muted">{S.intro}</p>
         </div>
       </div>
 
       {accounts.length === 0 && !accountsLoading ? (
-        <p className="state">
-          Chưa có tài khoản nào. Hãy mở trang “Tổng quan” và bấm “Thêm tài khoản Google”.
-        </p>
+        <p className="state">{S.noAccounts}</p>
       ) : (
         <div className="panes">
           {renderPane('left')}

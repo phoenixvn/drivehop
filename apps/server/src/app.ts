@@ -205,7 +205,7 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Bui
     if (!isLocalHost(request.headers.host)) {
       return reply
         .status(403)
-        .send({ code: API_ERROR_CODES.badRequest, message: 'Máy chủ chỉ chấp nhận yêu cầu từ localhost.' });
+        .send({ code: API_ERROR_CODES.badRequest, message: 'The server only accepts requests from localhost.' });
     }
     return undefined;
   });
@@ -220,7 +220,7 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Bui
     const forbidden = (): FastifyReply =>
       reply
         .status(403)
-        .send({ code: API_ERROR_CODES.badRequest, message: 'Yêu cầu bị từ chối vì không đến từ giao diện DriveHop.' });
+        .send({ code: API_ERROR_CODES.badRequest, message: 'Request refused: it did not come from the DriveHop UI.' });
     const origin = request.headers.origin;
     const safeMethod = request.method === 'GET' || request.method === 'HEAD' || request.method === 'OPTIONS';
     if (!safeMethod && origin !== undefined && origin !== config.webOrigin) return forbidden();
@@ -237,7 +237,7 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Bui
   }
   app.setNotFoundHandler((request, reply) => {
     if (webDist !== null && serveWebUi(webDist, request, reply)) return;
-    send(reply, 404, { code: API_ERROR_CODES.notFound, message: 'Không tìm thấy đường dẫn.' });
+    send(reply, 404, { code: API_ERROR_CODES.notFound, message: 'Path not found.' });
   });
 
   // Every error becomes { code, message }. Stack traces, tokens and upstream error objects
@@ -266,7 +266,7 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Bui
     if (typeof statusCode === 'number' && statusCode >= 400 && statusCode < 500) {
       return send(reply, statusCode, {
         code: statusCode === 404 ? API_ERROR_CODES.notFound : API_ERROR_CODES.badRequest,
-        message: 'Yêu cầu không hợp lệ.',
+        message: 'Invalid request.',
       });
     }
     request.log.error(
@@ -276,7 +276,7 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Bui
       },
       'unhandled error',
     );
-    return send(reply, 500, { code: API_ERROR_CODES.internal, message: 'Lỗi máy chủ nội bộ.' });
+    return send(reply, 500, { code: API_ERROR_CODES.internal, message: 'Internal server error.' });
   });
 
   await app.register(cors, {

@@ -31,7 +31,7 @@ export function providerErrorToHttp(err: ProviderError): { statusCode: number; b
         statusCode: 401,
         body: {
           code: API_ERROR_CODES.needsReconnect,
-          message: 'Tài khoản cần được kết nối lại với Google.',
+          message: 'The account needs to be reconnected to Google.',
         },
       };
     case 'rate_limit':
@@ -39,27 +39,27 @@ export function providerErrorToHttp(err: ProviderError): { statusCode: number; b
         statusCode: 429,
         body: {
           code: API_ERROR_CODES.rateLimited,
-          message: 'Google đang giới hạn tần suất yêu cầu. Hãy thử lại sau ít phút.',
+          message: 'Google is rate-limiting requests. Try again in a few minutes.',
         },
       };
     case 'not_found':
       return {
         statusCode: 404,
-        body: { code: API_ERROR_CODES.notFound, message: 'Không tìm thấy tệp hoặc thư mục.' },
+        body: { code: API_ERROR_CODES.notFound, message: 'File or folder not found.' },
       };
     case 'forbidden':
       return {
         statusCode: 403,
         body: {
           code: API_ERROR_CODES.providerError,
-          message: 'Google từ chối yêu cầu: tài khoản không có quyền thực hiện thao tác này.',
+          message: 'Google refused the request: the account is not allowed to do this.',
         },
       };
     case 'server':
     case 'unknown':
       return {
         statusCode: 502,
-        body: { code: API_ERROR_CODES.providerError, message: 'Google Drive trả về lỗi. Hãy thử lại.' },
+        body: { code: API_ERROR_CODES.providerError, message: 'Google Drive returned an error. Please try again.' },
       };
   }
 }

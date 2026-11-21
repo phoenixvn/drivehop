@@ -24,9 +24,9 @@ Free, open source, one double-click on Windows.
 
 </div>
 
-![Demo: overview → pick files → move → live progress](docs/blog-assets/multicloud-demo.gif)
+![Demo: overview → pick files → move → live progress](docs/media/demo.gif)
 
-> The demo runs in mock mode (`?mock=1`). None of the accounts or files in it are real.
+> The demo runs in demo mode (`?mock=1`, dev server only). None of the accounts or files in it are real. [Watch it as MP4](docs/media/demo.mp4).
 
 ## Real run
 
@@ -34,7 +34,7 @@ Free Google accounts fill up at 15 GB, and Google gives you no way to move files
 
 | Overview | Transfer confirmation | Live progress |
 |---|---|---|
-| ![](docs/blog-assets/01-tong-quan.png) | ![](docs/blog-assets/03-xac-nhan-chuyen.png) | ![](docs/blog-assets/04-dang-chuyen.png) |
+| ![Overview](docs/media/overview.png) | ![Transfer confirmation](docs/media/transfer-dialog.png) | ![Live progress](docs/media/transfers.png) |
 
 ## What it does
 
@@ -52,6 +52,7 @@ A two-pane file browser: pick or drag items, then **Copy** or **Move** them to a
 - Background jobs you can **resume, retry and verify**. Copies are idempotent, so a retry never creates duplicates.
 - Handles Drive's quirks: shortcuts are recreated pointing at the copy of their target; Google Docs, Sheets and Slides are copied natively.
 - Respects Google's limits: 750 GB per day, and backoff on rate limits.
+- **English and Vietnamese UI**, switchable from the header.
 
 ### Stays yours
 

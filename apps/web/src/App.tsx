@@ -11,6 +11,57 @@ import { TransfersDrawer } from './components/TransfersDrawer.tsx';
 import { useAccounts, useServerStatus } from './hooks/useServer.ts';
 import { useTransfers } from './hooks/useTransfers.ts';
 import { MODE_LABELS, authErrorText } from './lib/format.ts';
+import { LANGS, lang, strings, switchLang } from './lib/i18n.ts';
+
+const S = strings({
+  en: {
+    connected: 'Google account connected.',
+    jobDone: (mode: string, done: number, items: number) => `${mode} finished: ${done}/${items} items.`,
+    jobDoneWithErrors: (mode: string, failed: number) =>
+      `${mode} finished with ${failed} failed ${failed === 1 ? 'item' : 'items'}. Open “Transfers” to review and retry.`,
+    jobFailed: (mode: string) => `${mode} failed. Open “Transfers” for details.`,
+    jobCanceled: (mode: string) => `${mode} job canceled.`,
+    addUnreachable: "Can't reach the server, so accounts can't be added yet.",
+    addNotConfigured: 'Finish setting up Google OAuth (see the notice above) before adding accounts.',
+    skipLink: 'Skip to main content',
+    mockTitle: 'Fake in-memory data, no server calls',
+    mockBadge: 'Demo mode',
+    mainNav: 'Main navigation',
+    overview: 'Overview',
+    files: 'File browser',
+    refreshTitle: 'Reload the account and job lists',
+    refresh: 'Refresh',
+    transfers: 'Transfers',
+    runningJobs: (n: number) => `, ${n} ${n === 1 ? 'job' : 'jobs'} running`,
+    connecting: 'Connecting to the DriveHop server…',
+    language: 'Language',
+    langNames: { en: 'English', vi: 'Vietnamese' },
+  },
+  vi: {
+    connected: 'Đã kết nối tài khoản Google thành công.',
+    jobDone: (mode: string, done: number, items: number) => `${mode} hoàn tất: ${done}/${items} mục.`,
+    jobDoneWithErrors: (mode: string, failed: number) =>
+      `${mode} kết thúc với ${failed} mục lỗi. Mở “Chuyển tệp” để xem và thử lại.`,
+    jobFailed: (mode: string) => `${mode} thất bại. Mở “Chuyển tệp” để xem chi tiết.`,
+    jobCanceled: (mode: string) => `Đã hủy tác vụ ${mode.toLowerCase()}.`,
+    addUnreachable: 'Không kết nối được máy chủ nên chưa thể thêm tài khoản.',
+    addNotConfigured:
+      'Cần hoàn tất thiết lập Google OAuth (xem thông báo phía trên) trước khi thêm tài khoản.',
+    skipLink: 'Bỏ qua, tới nội dung chính',
+    mockTitle: 'Dữ liệu giả lập trong bộ nhớ, không gọi máy chủ',
+    mockBadge: 'Chế độ giả lập',
+    mainNav: 'Điều hướng chính',
+    overview: 'Tổng quan',
+    files: 'Trình duyệt tệp',
+    refreshTitle: 'Tải lại danh sách tài khoản và tác vụ',
+    refresh: 'Làm mới',
+    transfers: 'Chuyển tệp',
+    runningJobs: (n: number) => `, ${n} tác vụ đang chạy`,
+    connecting: 'Đang kết nối máy chủ DriveHop…',
+    language: 'Ngôn ngữ',
+    langNames: { en: 'Tiếng Anh', vi: 'Tiếng Việt' },
+  },
+});
 
 type View = 'overview' | 'files';
 
@@ -64,7 +115,7 @@ export function App() {
     url.searchParams.delete(AUTH_RESULT_PARAMS.error);
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
     if (authError !== null) pushToast('error', authErrorText(authError));
-    else pushToast('success', 'Đã kết nối tài khoản Google thành công.');
+    else pushToast('success', S.connected);
   }, [pushToast]);
 
   const handleJobFinished = useCallback(
@@ -81,13 +132,13 @@ export function App() {
       const mode = MODE_LABELS[job.mode];
       const { done, items, failed } = job.totals;
       if (job.status === 'completed') {
-        pushToast('success', `${mode} hoàn tất: ${done}/${items} mục.`);
+        pushToast('success', S.jobDone(mode, done, items));
       } else if (job.status === 'completed_with_errors') {
-        pushToast('error', `${mode} kết thúc với ${failed} mục lỗi. Mở “Chuyển tệp” để xem và thử lại.`);
+        pushToast('error', S.jobDoneWithErrors(mode, failed));
       } else if (job.status === 'failed') {
-        pushToast('error', `${mode} thất bại. Mở “Chuyển tệp” để xem chi tiết.`);
+        pushToast('error', S.jobFailed(mode));
       } else if (job.status === 'canceled') {
-        pushToast('info', `Đã hủy tác vụ ${mode.toLowerCase()}.`);
+        pushToast('info', S.jobCanceled(mode));
       }
     },
     [refreshQuotas, refreshAccounts, pushToast],
@@ -166,49 +217,50 @@ export function App() {
   const configured = server.kind === 'ready' && server.status.configured;
   const addDisabledReason =
     server.kind === 'unreachable'
-      ? 'Không kết nối được máy chủ nên chưa thể thêm tài khoản.'
+      ? S.addUnreachable
       : server.kind === 'ready' && !server.status.configured
-        ? 'Cần hoàn tất thiết lập Google OAuth (xem thông báo phía trên) trước khi thêm tài khoản.'
+        ? S.addNotConfigured
         : null;
 
   return (
     <div className={`app${drawerOpen ? ' app--drawer' : ''}`}>
       <a className="skip-link" href="#main">
-        Bỏ qua, tới nội dung chính
+        {S.skipLink}
       </a>
       <header className="topbar">
         <div className="topbar__brand">
+          <img className="topbar__logo" src="/logo.svg" alt="" width="28" height="28" />
           <h1>DriveHop</h1>
           {isMock && (
-            <span className="tag tag--mock" title="Dữ liệu giả lập trong bộ nhớ, không gọi máy chủ">
-              Chế độ giả lập
+            <span className="tag tag--mock" title={S.mockTitle}>
+              {S.mockBadge}
             </span>
           )}
         </div>
-        <nav className="topbar__nav" aria-label="Điều hướng chính">
+        <nav className="topbar__nav" aria-label={S.mainNav}>
           <a
             href={VIEW_HASHES.overview}
             className="tab"
             aria-current={view === 'overview' ? 'page' : undefined}
           >
-            Tổng quan
+            {S.overview}
           </a>
           <a
             href={VIEW_HASHES.files}
             className="tab"
             aria-current={view === 'files' ? 'page' : undefined}
           >
-            Trình duyệt tệp
+            {S.files}
           </a>
         </nav>
         <button
           type="button"
           className="button topbar__refresh"
           disabled={!serverReady}
-          title="Tải lại danh sách tài khoản và tác vụ"
+          title={S.refreshTitle}
           onClick={() => refreshAll(true)}
         >
-          Làm mới
+          {S.refresh}
         </button>
         <button
           ref={drawerToggleRef}
@@ -219,21 +271,36 @@ export function App() {
           disabled={!serverReady}
           onClick={() => setDrawerOpen((open) => !open)}
         >
-          Chuyển tệp
+          {S.transfers}
           {transfers.activeCount > 0 && (
             <span className="count-badge">
               <span aria-hidden="true">{transfers.activeCount}</span>
-              <span className="visually-hidden">, {transfers.activeCount} tác vụ đang chạy</span>
+              <span className="visually-hidden">{S.runningJobs(transfers.activeCount)}</span>
             </span>
           )}
         </button>
+        <div className="lang-switch" role="group" aria-label={S.language}>
+          {LANGS.map((code) => (
+            <button
+              key={code}
+              type="button"
+              className="lang-switch__option"
+              lang={code}
+              title={S.langNames[code]}
+              aria-pressed={code === lang}
+              onClick={() => switchLang(code)}
+            >
+              {code.toUpperCase()}
+            </button>
+          ))}
+        </div>
       </header>
 
       <main id="main" className="app__main" tabIndex={-1}>
         <SetupBanner server={server} onRetry={retryServer} />
         {server.kind === 'loading' && (
           <p className="state" role="status">
-            Đang kết nối máy chủ DriveHop…
+            {S.connecting}
           </p>
         )}
         {serverReady && (

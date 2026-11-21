@@ -58,7 +58,7 @@ export const authRoutes: FastifyPluginAsync<RouteDeps> = async (app, deps) => {
       !sameString(cookieState, query.state) ||
       !stateKnown
     ) {
-      throw badRequest('Phiên đăng nhập Google không hợp lệ hoặc đã hết hạn. Hãy thử kết nối lại.');
+      throw badRequest('The Google sign-in session is invalid or expired. Try connecting again.');
     }
 
     if (oauth === null) throw notConfigured(deps.getStatus().missing);

@@ -32,5 +32,5 @@ export {
 
 /** Throws 404 `not_found` unless `accountId` belongs to a stored account. */
 export function requireAccount(accounts: AccountsRepo, accountId: string): void {
-  if (!accounts.exists(accountId)) throw notFound('Không tìm thấy tài khoản này (có thể đã bị gỡ).');
+  if (!accounts.exists(accountId)) throw notFound('Account not found (it may have been removed).');
 }

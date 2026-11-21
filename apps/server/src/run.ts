@@ -96,7 +96,7 @@ export async function runServer(options: RunServerOptions = {}): Promise<void> {
     const url = `http://localhost:${port}/`;
     if (options.openBrowser) {
       // Most likely DriveHop is already running (double-clicked twice): show it instead.
-      console.log(`Cổng ${port} đang được dùng, có thể DriveHop đã chạy rồi. Mở ${url} ...`);
+      console.log(`Port ${port} is already in use; DriveHop is probably running already. Opening ${url} ...`);
       openInBrowser(url);
       return;
     }

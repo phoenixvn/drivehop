@@ -61,5 +61,5 @@ export function parseOrBadRequest<T>(schema: z.ZodType<T>, input: unknown): T {
   if (result.success) return result.data;
   const issue = result.error.issues[0];
   const where = issue === undefined || issue.path.length === 0 ? '' : `${issue.path.join('.')}: `;
-  throw badRequest(`Tham số không hợp lệ (${where}${issue?.message ?? 'invalid input'}).`);
+  throw badRequest(`Invalid parameter (${where}${issue?.message ?? 'invalid input'}).`);
 }

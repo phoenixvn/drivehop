@@ -3,6 +3,80 @@ import type { FormEvent } from 'react';
 import type { SetupInfo } from '@multicloud/shared';
 import { useApi } from '../api/ApiContext.ts';
 import { apiErrorText } from '../lib/format.ts';
+import { strings } from '../lib/i18n.ts';
+
+// Google Cloud console labels (Get started, External, Audience, ...) stay in English in both
+// languages: that is how the console shows them.
+const S = strings({
+  en: {
+    copied: 'Copied',
+    copy: 'Copy',
+    restartTimeout: "DriveHop didn't restart in time. Reload the page.",
+    title: 'First-time setup: connect DriveHop to Google',
+    leadBefore: 'DriveHop runs entirely on your computer. To read Google Drive, you create',
+    leadStrong: 'your own OAuth client',
+    leadAfter:
+      'on Google Cloud (free, about 10 minutes, one time only). Nobody else holds access to your Drive.',
+    step1Before: 'Open',
+    step1After: 'and create a project (any name, for example',
+    step1End: ').',
+    step2Before: 'Enable',
+    step2After: 'for that project.',
+    step3Before: 'Go to',
+    step3Click: ', click',
+    step3Choose: ', choose',
+    step3Under: '. Under',
+    step3Click2: ', click',
+    step3After: "(no verification needed) so you don't have to sign in again every 7 days.",
+    step4Before: 'Under',
+    step4After: ', add the scope',
+    step5Before: 'Under',
+    step5Create: ', create a client of type',
+    step5In: '. In',
+    step5After: ', add exactly this address:',
+    step6: 'Copy the new Client ID and Client secret into the fields below.',
+    saving: 'Saving…',
+    restarting: 'Restarting…',
+    save: 'Save and continue',
+    noteBefore:
+      'When you sign in to Google, you will see the warning “Google hasn’t verified this app”. It’s your own app: click',
+    noteAfter: 'to continue.',
+  },
+  vi: {
+    copied: 'Đã chép',
+    copy: 'Chép',
+    restartTimeout: 'DriveHop chưa khởi động lại kịp. Hãy tải lại trang.',
+    title: 'Thiết lập lần đầu: kết nối DriveHop với Google',
+    leadBefore: 'DriveHop chạy hoàn toàn trên máy bạn. Để đọc Google Drive, bạn tạo một',
+    leadStrong: 'OAuth client của riêng bạn',
+    leadAfter:
+      'trên Google Cloud (miễn phí, khoảng 10 phút, chỉ làm một lần). Không ai khác giữ quyền truy cập Drive của bạn.',
+    step1Before: 'Mở',
+    step1After: 'và tạo một project (tên tùy ý, ví dụ',
+    step1End: ').',
+    step2Before: 'Bật',
+    step2After: 'cho project đó.',
+    step3Before: 'Vào',
+    step3Click: ', bấm',
+    step3Choose: ', chọn',
+    step3Under: '. Ở mục',
+    step3Click2: ', bấm',
+    step3After: '(không cần gửi xác minh) để không phải đăng nhập lại mỗi 7 ngày.',
+    step4Before: 'Ở mục',
+    step4After: ', thêm scope',
+    step5Before: 'Ở mục',
+    step5Create: ', tạo client loại',
+    step5In: '. Trong',
+    step5After: ', thêm đúng địa chỉ này:',
+    step6: 'Chép Client ID và Client secret vừa tạo vào ô bên dưới.',
+    saving: 'Đang lưu…',
+    restarting: 'Đang khởi động lại…',
+    save: 'Lưu và tiếp tục',
+    noteBefore:
+      'Khi đăng nhập Google, bạn sẽ thấy cảnh báo “Google chưa xác minh ứng dụng này”. Đó là app của chính bạn: bấm',
+    noteAfter: 'để tiếp tục.',
+  },
+});
 
 interface SetupWizardProps {
   setup: SetupInfo;
@@ -31,7 +105,7 @@ function CopyValue({ value }: { value: string }) {
           );
         }}
       >
-        {copied ? 'Đã chép' : 'Chép'}
+        {copied ? S.copied : S.copy}
       </button>
     </span>
   );
@@ -59,7 +133,7 @@ export function SetupWizard({ setup, onDone }: SetupWizardProps) {
         // The server is restarting: keep polling.
       }
     }
-    throw new Error('DriveHop chưa khởi động lại kịp. Hãy tải lại trang.');
+    throw new Error(S.restartTimeout);
   };
 
   const submit = async (event: FormEvent): Promise<void> => {
@@ -82,23 +156,22 @@ export function SetupWizard({ setup, onDone }: SetupWizardProps) {
 
   return (
     <section className="setup" aria-labelledby="setup-title">
-      <h2 id="setup-title">Thiết lập lần đầu: kết nối DriveHop với Google</h2>
+      <h2 id="setup-title">{S.title}</h2>
       <p className="setup__lead">
-        DriveHop chạy hoàn toàn trên máy bạn. Để đọc Google Drive, bạn tạo một <strong>OAuth client của
-        riêng bạn</strong> trên Google Cloud (miễn phí, khoảng 10 phút, chỉ làm một lần). Không ai khác
-        giữ quyền truy cập Drive của bạn.
+        {S.leadBefore} <strong>{S.leadStrong}</strong> {S.leadAfter}
       </p>
 
       <ol className="setup__steps">
         <li>
-          Mở{' '}
+          {S.step1Before}{' '}
           <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noreferrer">
             Google Cloud Console
           </a>{' '}
-          và tạo một project (tên tùy ý, ví dụ <em>DriveHop</em>).
+          {S.step1After} <em>DriveHop</em>
+          {S.step1End}
         </li>
         <li>
-          Bật{' '}
+          {S.step2Before}{' '}
           <a
             href="https://console.cloud.google.com/apis/library/drive.googleapis.com"
             target="_blank"
@@ -106,25 +179,30 @@ export function SetupWizard({ setup, onDone }: SetupWizardProps) {
           >
             Google Drive API
           </a>{' '}
-          cho project đó.
+          {S.step2After}
         </li>
         <li>
-          Vào{' '}
+          {S.step3Before}{' '}
           <a href="https://console.cloud.google.com/auth/overview" target="_blank" rel="noreferrer">
             Google Auth Platform
           </a>
-          , bấm <em>Get started</em>, chọn <em>External</em>. Ở mục <em>Audience</em>, bấm{' '}
-          <strong>Publish app</strong> (không cần gửi xác minh) để không phải đăng nhập lại mỗi 7 ngày.
+          {S.step3Click} <em>Get started</em>
+          {S.step3Choose} <em>External</em>
+          {S.step3Under} <em>Audience</em>
+          {S.step3Click2} <strong>Publish app</strong> {S.step3After}
         </li>
         <li>
-          Ở mục <em>Data access</em>, thêm scope <code>https://www.googleapis.com/auth/drive</code>.
+          {S.step4Before} <em>Data access</em>
+          {S.step4After} <code>https://www.googleapis.com/auth/drive</code>.
         </li>
         <li>
-          Ở mục <em>Clients</em>, tạo client loại <strong>Web application</strong>. Trong{' '}
-          <em>Authorized redirect URIs</em>, thêm đúng địa chỉ này:
+          {S.step5Before} <em>Clients</em>
+          {S.step5Create} <strong>Web application</strong>
+          {S.step5In} <em>Authorized redirect URIs</em>
+          {S.step5After}
           <CopyValue value={setup.redirectUri} />
         </li>
-        <li>Chép Client ID và Client secret vừa tạo vào ô bên dưới.</li>
+        <li>{S.step6}</li>
       </ol>
 
       <form className="setup__form" onSubmit={(event) => void submit(event)}>
@@ -161,12 +239,11 @@ export function SetupWizard({ setup, onDone }: SetupWizardProps) {
         )}
         <div className="setup__actions">
           <button type="submit" className="button button--primary" disabled={busy}>
-            {phase === 'saving' ? 'Đang lưu…' : phase === 'restarting' ? 'Đang khởi động lại…' : 'Lưu và tiếp tục'}
+            {phase === 'saving' ? S.saving : phase === 'restarting' ? S.restarting : S.save}
           </button>
         </div>
         <p className="setup__note">
-          Khi đăng nhập Google, bạn sẽ thấy cảnh báo “Google chưa xác minh ứng dụng này”. Đó là app của
-          chính bạn: bấm <em>Advanced</em> → <em>Go to … (unsafe)</em> để tiếp tục.
+          {S.noteBefore} <em>Advanced</em> → <em>Go to … (unsafe)</em> {S.noteAfter}
         </p>
       </form>
     </section>

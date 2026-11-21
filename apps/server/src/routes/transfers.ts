@@ -35,7 +35,7 @@ export interface TransferRouteDeps {
 }
 
 function jobNotFound(): HttpError {
-  return notFound('Không tìm thấy tác vụ chuyển tệp này.');
+  return notFound('Transfer job not found.');
 }
 
 /**
@@ -58,7 +58,7 @@ export const transferRoutes: FastifyPluginAsync<TransferRouteDeps> = async (app,
       throw new HttpError(
         400,
         API_ERROR_CODES.moveNotConfirmed,
-        'Thao tác di chuyển phải được xác nhận (confirmMove: true) vì tệp gốc sẽ bị chuyển vào thùng rác.',
+        'A move must be confirmed (confirmMove: true) because the originals will be moved to the trash.',
       );
     }
     requireAccount(accounts, body.sourceAccountId);
@@ -123,7 +123,7 @@ export const transferRoutes: FastifyPluginAsync<TransferRouteDeps> = async (app,
     const { id } = parseOrBadRequest(jobParamsSchema, request.params);
     const body = parseOrBadRequest(purgeTrashedSchema, request.body ?? {});
     if (body.confirmPermanentDelete !== true) {
-      throw new HttpError(400, API_ERROR_CODES.purgeNotConfirmed, 'Xóa vĩnh viễn phải được xác nhận rõ ràng (confirmPermanentDelete: true) vì không thể hoàn tác.');
+      throw new HttpError(400, API_ERROR_CODES.purgeNotConfirmed, 'A permanent delete must be confirmed explicitly (confirmPermanentDelete: true) because it cannot be undone.');
     }
     if (engine.getJob(id) === undefined) throw jobNotFound();
     return engine.purgeTrashedSources(id, { maxItems: 500 });

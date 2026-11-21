@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.0 (2026-11-21)
+
+- **English UI.** The app is now in English and Vietnamese: it follows your browser language, and an EN | VI switch sits in the header. Messages from the local server are in English.
+- **New look.** Inter font (bundled, works offline), brand colors, softer cards, gradient storage bars, cleaner dark mode, a logo and favicon.
+- Long email addresses no longer wrap mid-word on account cards.
+- New English demo GIF, video and screenshots.
+
 ## v0.1.0 (2026-11-21)
 
 First public release.

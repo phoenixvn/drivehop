@@ -23,11 +23,11 @@ if (process.env.WEB_ORIGIN === undefined || process.env.WEB_ORIGIN === '') {
 }
 process.title = 'DriveHop';
 
-console.log('DriveHop đang chạy. Giữ cửa sổ này mở trong lúc dùng; đóng nó để tắt DriveHop.');
-console.log(`Dữ liệu: ${process.env.DATA_DIR}`);
+console.log('DriveHop is running. Keep this window open while you use it; close it to quit.\n(DriveHop đang chạy. Giữ cửa sổ này mở trong lúc dùng; đóng nó để tắt.)');
+console.log(`Data: ${process.env.DATA_DIR}`);
 
 runServer({ openBrowser: process.env.DRIVEHOP_NO_BROWSER !== '1' }).catch((err: unknown) => {
-  console.error(`DriveHop không khởi động được: ${err instanceof Error ? err.message : 'unknown error'}`);
+  console.error(`DriveHop could not start: ${err instanceof Error ? err.message : 'unknown error'}`);
   // Keep the console window open long enough to read the message.
   setTimeout(() => process.exit(1), 30_000);
 });

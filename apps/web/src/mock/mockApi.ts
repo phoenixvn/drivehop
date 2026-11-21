@@ -11,7 +11,13 @@ import type {
 } from '@multicloud/shared';
 import { ApiRequestError, CLIENT_ERROR_CODES } from '../api/client.ts';
 import type { ApiClient, EventHandlers } from '../api/client.ts';
+import { strings } from '../lib/i18n.ts';
 import { FOLDER_MIME, createMockAccounts, createMockFiles, nextMockId } from './data.ts';
+
+const M = strings({
+  en: { badSetup: 'Invalid client ID or client secret (mock).' },
+  vi: { badSetup: 'Client ID hoặc client secret không hợp lệ (mock).' },
+});
 
 const PAGE_SIZE = 25;
 const LATENCY_MS = 180;
@@ -203,7 +209,7 @@ export function createMockApi(search: string): ApiClient {
         status: 'pending',
       };
       // Google-native files cannot be streamed; across accounts the mock fails them once so the
-      // error text and "Thử lại mục lỗi" can be exercised.
+      // error text and "retry failed items" can be exercised.
       if (source?.isGoogleNative && req.sourceAccountId !== req.destAccountId) {
         failOnce.set(
           item.id,
@@ -308,7 +314,7 @@ export function createMockApi(search: string): ApiClient {
       delay(() => {
         guard();
         if (!/\.apps\.googleusercontent\.com$/.test(req.clientId.trim()) || req.clientSecret.trim().length < 8) {
-          throw new ApiRequestError('bad_request', 'Client ID hoặc client secret không hợp lệ (mock).', 400);
+          throw new ApiRequestError('bad_request', M.badSetup, 400);
         }
         state = 'ok';
       }),

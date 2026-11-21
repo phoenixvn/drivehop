@@ -135,6 +135,11 @@ for (const input of Object.keys(result.metafile.inputs)) {
   const match = /node_modules[\\/]((?:@[^\\/]+[\\/])?[^\\/]+)/.exec(input);
   if (match) bundled.add(match[1].replace(/\\/g, '/'));
 }
+// The web UI (app/web) bundles its runtime dependencies too (React, the Inter font, ...).
+const webPkg = JSON.parse(readFileSync(path.join(ROOT, 'apps', 'web', 'package.json'), 'utf8'));
+for (const name of Object.keys(webPkg.dependencies ?? {})) {
+  if (!name.startsWith('@multicloud/')) bundled.add(name);
+}
 for (const name of [...bundled].sort()) {
   const dir = path.join(NM, ...name.split('/'));
   const pkg = JSON.parse(readFileSync(path.join(dir, 'package.json'), 'utf8'));

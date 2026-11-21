@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { strings } from '../lib/i18n.ts';
+
+const CLOSE_LABEL = strings({ en: 'Close notification', vi: 'Đóng thông báo' });
 
 export type ToastKind = 'success' | 'error' | 'info';
 
@@ -42,7 +45,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: number)
       <button
         type="button"
         className="icon-button"
-        aria-label="Đóng thông báo"
+        aria-label={CLOSE_LABEL}
         onClick={() => onDismiss(toast.id)}
       >
         ×

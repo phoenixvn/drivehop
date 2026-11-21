@@ -5,6 +5,8 @@ import type { ApiContextValue } from './api/ApiContext.ts';
 import { createHttpApiClient } from './api/client.ts';
 import { withApiSignals } from './api/signals.ts';
 import { App } from './App.tsx';
+import { strings } from './lib/i18n.ts';
+import '@fontsource-variable/inter/index.css';
 import './styles.css';
 
 async function createApi(): Promise<ApiContextValue> {
@@ -16,6 +18,11 @@ async function createApi(): Promise<ApiContextValue> {
   }
   return { ...withApiSignals(createHttpApiClient()), isMock: false };
 }
+
+const S = strings({
+  en: { startFailed: "Couldn't start DriveHop. Reload the page." },
+  vi: { startFailed: 'Không khởi động được DriveHop. Hãy tải lại trang.' },
+});
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Missing #root element');
@@ -33,6 +40,6 @@ createApi().then(
   },
   (error: unknown) => {
     console.error(error);
-    container.textContent = 'Không khởi động được DriveHop. Hãy tải lại trang.';
+    container.textContent = S.startFailed;
   },
 );

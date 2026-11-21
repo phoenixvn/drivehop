@@ -3,8 +3,9 @@ import { ROOT_FOLDER_ID } from '@multicloud/shared';
 import type { AccountWithQuota, Breadcrumb, FileEntry } from '@multicloud/shared';
 import type { ApiClient } from '../api/client.ts';
 import { apiErrorText, isNeedsReconnect, sortEntries } from '../lib/format.ts';
+import { strings } from '../lib/i18n.ts';
 
-export const ROOT_LABEL = 'Drive của tôi';
+export const ROOT_LABEL = strings({ en: 'My Drive', vi: 'Drive của tôi' });
 
 export interface PaneState {
   accountId: string | null;

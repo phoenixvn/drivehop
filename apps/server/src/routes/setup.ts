@@ -51,14 +51,14 @@ export const setupRoutes: FastifyPluginAsync<SetupRouteDeps> = async (app, deps)
       throw new HttpError(
         409,
         'conflict',
-        'Đã có tài khoản được liên kết. Đổi OAuth client sẽ làm hỏng các tài khoản đó, nên không đổi từ giao diện được.',
+        'Accounts are already linked. Changing the OAuth client would break them, so it cannot be changed from the UI.',
       );
     }
     const parsed = setupSchema.safeParse(request.body);
     if (!parsed.success) {
       // Never echo the submitted values: the secret must not come back in a response or a log.
       throw badRequest(
-        'Client ID phải có dạng …apps.googleusercontent.com, client secret phải dài ít nhất 8 ký tự và không chứa khoảng trắng.',
+        'The Client ID must end with .apps.googleusercontent.com, and the client secret must be at least 8 characters with no spaces.',
       );
     }
     const body = parsed.data;
