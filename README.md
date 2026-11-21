@@ -31,7 +31,7 @@ Free Google accounts fill up at 15 GB, and Google gives you no way to move files
 
 ## Two ways to run it
 
-| | Local (Node) | Cloudflare (Worker) |
+| | Local (`DriveHop.exe` or Node) | Cloudflare (Worker) |
 |---|---|---|
 | Cost | Free | Workers Paid (5 USD/month); Zero Trust free plan |
 | Access | `127.0.0.1` only | Your domain, protected by Cloudflare Access |
@@ -47,9 +47,17 @@ You create **your own** OAuth client in Google Cloud. It takes about 10 minutes 
 3. Create a **Web application** client with redirect URI `http://localhost:8787/api/auth/google/callback`, plus your domain's callback if you deploy to Cloudflare.
 4. Publish the app ("In production", without verification) so refresh tokens don't expire after 7 days. You will see an "unverified app" warning when you sign in, and that is expected.
 
-Step-by-step with screenshots of the right settings: [README.vi.md §5](README.vi.md#5-thiết-lập-google-cloud).
+Step-by-step guide with the exact settings: [README.vi.md §5](README.vi.md#5-thiết-lập-google-cloud).
 
-## Quick start (local)
+## Quick start: Windows app (no Node needed)
+
+1. Download `DriveHop-win-x64-v<version>.zip` from [Releases](https://github.com/phoenixvn/drivehop/releases) and unzip it.
+2. Double-click **`DriveHop.exe`**. The exe is not code-signed yet, so SmartScreen may warn: *More info → Run anyway*.
+3. Your browser opens `http://localhost:8787`. The first-run screen walks you through creating your Google OAuth client, and you paste the Client ID and secret there. That's it.
+
+Data lives in `%LOCALAPPDATA%\DriveHop\data`. Keep the console window open while you use the app; close it to quit. To build the exe yourself: `npm install && npm run build:desktop`.
+
+## Quick start (from source)
 
 Requires Node.js ≥ 22.12 and npm.
 

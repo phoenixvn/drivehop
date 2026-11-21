@@ -19,3 +19,6 @@ coverage/
 apps/worker/wrangler.jsonc
 # Internal brief for the blog post
 docs/blog-assets/BRIEF.md
+
+# Desktop build output (attach the zip to a GitHub release; never commit binaries)
+release/

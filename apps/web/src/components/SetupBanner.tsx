@@ -1,3 +1,4 @@
+import { SetupWizard } from './SetupWizard.tsx';
 import type { ServerState } from '../hooks/useServer.ts';
 
 interface SetupBannerProps {
@@ -63,8 +64,17 @@ export function SetupBanner({ server, onRetry }: SetupBannerProps) {
     );
   }
 
-  const { configured, missing, keyringAvailable } = server.status;
+  const { configured, missing, keyringAvailable, setup } = server.status;
   if (configured && keyringAvailable) return null;
+
+  if (!configured && setup?.allowed) {
+    return (
+      <>
+        <SetupWizard setup={setup} onDone={onRetry} />
+        {!keyringAvailable && <KeyringNotice />}
+      </>
+    );
+  }
 
   return (
     <>
@@ -96,17 +106,21 @@ export function SetupBanner({ server, onRetry }: SetupBannerProps) {
           </button>
         </div>
       )}
-      {!keyringAvailable && (
-        <div className="banner banner--info" role="status">
-          <div>
-            <strong>Không dùng được kho khóa của hệ điều hành.</strong>
-            <p>
-              Máy chủ đang mã hóa thông tin đăng nhập bằng khóa dự phòng{' '}
-              <code>MULTICLOUD_MASTER_KEY</code>. Xem <code>README.md</code> để biết chi tiết.
-            </p>
-          </div>
-        </div>
-      )}
+      {!keyringAvailable && <KeyringNotice />}
     </>
+  );
+}
+
+function KeyringNotice() {
+  return (
+    <div className="banner banner--info" role="status">
+      <div>
+        <strong>Không dùng được kho khóa của hệ điều hành.</strong>
+        <p>
+          Máy chủ đang mã hóa thông tin đăng nhập bằng khóa dự phòng{' '}
+          <code>MULTICLOUD_MASTER_KEY</code>. Xem <code>README.md</code> để biết chi tiết.
+        </p>
+      </div>
+    </div>
   );
 }

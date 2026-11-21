@@ -10,7 +10,7 @@ export function notConfigured(missing: readonly string[]): HttpError {
   return new HttpError(
     503,
     API_ERROR_CODES.notConfigured,
-    `Máy chủ chưa được cấu hình. Thiếu biến môi trường: ${names}. Hãy thêm vào tệp .env ở thư mục gốc rồi khởi động lại máy chủ.`,
+    `Máy chủ chưa được cấu hình. Thiếu biến môi trường: ${names}. Hãy nhập OAuth client ở màn hình thiết lập, hoặc thêm vào tệp .env rồi khởi động lại máy chủ.`,
   );
 }
 

@@ -1159,3 +1159,80 @@ input[type='checkbox'] {
     transition: none;
   }
 }
+
+/* First-run setup (local app) */
+.setup {
+  margin-bottom: 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.setup h2 {
+  font-size: 1.2rem;
+}
+
+.setup__lead {
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.setup__steps {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+  padding-left: 22px;
+}
+
+.setup__copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.setup__copy code {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  overflow-wrap: anywhere;
+}
+
+.setup__form {
+  display: grid;
+  gap: 12px;
+  max-width: 560px;
+}
+
+.setup__field {
+  display: grid;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.setup__field input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.setup__field input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.setup__error {
+  color: var(--danger);
+}
+
+.setup__note {
+  color: var(--muted);
+  font-size: 0.9rem;
+}

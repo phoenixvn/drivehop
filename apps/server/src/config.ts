@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { SetupInfo } from '@multicloud/shared';
 import dotenv from 'dotenv';
 
 /** Absolute path of the repository root (this file lives in apps/server/src). */
@@ -9,6 +10,11 @@ export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url
 export const DEFAULT_PORT = 8787;
 export const DEFAULT_WEB_ORIGIN = 'http://localhost:5173';
 export const DEFAULT_DATA_DIR = './data';
+/**
+ * File in the data directory where the web UI's setup form saves the Google OAuth client
+ * (dotenv format). Lowest precedence: process env and the repo-root `.env` win over it.
+ */
+export const SETTINGS_FILE_NAME = 'config.env';
 
 /** Environment variables that must be set before any Google call can be made. */
 export const REQUIRED_GOOGLE_VARS = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'] as const;
@@ -27,6 +33,13 @@ export interface AppConfig {
   masterKeyBase64: string | null;
   /** http://localhost:<port>/api/auth/google/callback */
   redirectUri: string;
+  /** Absolute path of the settings file written by POST /api/setup (in dataDir). */
+  settingsFile: string;
+  /**
+   * Absolute path of the built web UI to serve on the API port (the packaged app), or `null` when
+   * the UI is served separately (Vite dev server). From WEB_DIST.
+   */
+  webDist: string | null;
 }
 
 /** Shape returned by GET /api/status (identical to StatusResponse of the shared contract). */
@@ -34,6 +47,7 @@ export interface ConfigStatus {
   configured: boolean;
   missing: string[];
   keyringAvailable: boolean;
+  setup?: SetupInfo;
 }
 
 export interface LoadConfigOptions {
@@ -41,6 +55,8 @@ export interface LoadConfigOptions {
   env?: Record<string, string | undefined>;
   /** Path of the `.env` file. Defaults to `<repo root>/.env`. Pass `null` to skip reading a file. */
   envFile?: string | null;
+  /** Pass `null` to ignore `<dataDir>/config.env`. Also ignored when `envFile` is `null`. */
+  settingsFile?: null;
 }
 
 function nonEmpty(value: string | undefined): string | null {
@@ -56,10 +72,12 @@ function nonEmpty(value: string | undefined): string | null {
  */
 export function loadConfig(options: LoadConfigOptions = {}): AppConfig {
   const processEnv = options.env ?? process.env;
+  // The packaged app (DRIVEHOP_DESKTOP=1) has no repository: no `.env`, only the settings file.
+  const isDesktop = processEnv.DRIVEHOP_DESKTOP === '1';
   const envFile = options.envFile === undefined ? path.join(REPO_ROOT, '.env') : options.envFile;
 
   let fileEnv: Record<string, string> = {};
-  if (envFile !== null && existsSync(envFile)) {
+  if (envFile !== null && !(isDesktop && options.envFile === undefined) && existsSync(envFile)) {
     fileEnv = dotenv.parse(readFileSync(envFile));
   }
   const read = (name: string): string | null => nonEmpty(processEnv[name]) ?? nonEmpty(fileEnv[name]);
@@ -84,15 +102,25 @@ export function loadConfig(options: LoadConfigOptions = {}): AppConfig {
   }
 
   const dataDir = path.resolve(REPO_ROOT, read('DATA_DIR') ?? DEFAULT_DATA_DIR);
+  const settingsFile = path.join(dataDir, SETTINGS_FILE_NAME);
+  let settingsEnv: Record<string, string> = {};
+  // Hermetic callers (tests) pass envFile: null; they never read the settings file either.
+  if (options.settingsFile !== null && envFile !== null && existsSync(settingsFile)) {
+    settingsEnv = dotenv.parse(readFileSync(settingsFile));
+  }
+  const readGoogle = (name: string): string | null => read(name) ?? nonEmpty(settingsEnv[name]);
+  const webDistRaw = read('WEB_DIST');
 
   return {
-    googleClientId: read('GOOGLE_CLIENT_ID'),
-    googleClientSecret: read('GOOGLE_CLIENT_SECRET'),
+    googleClientId: readGoogle('GOOGLE_CLIENT_ID'),
+    googleClientSecret: readGoogle('GOOGLE_CLIENT_SECRET'),
     port,
     webOrigin,
     dataDir,
     masterKeyBase64: read('MULTICLOUD_MASTER_KEY'),
     redirectUri: `http://localhost:${port}/api/auth/google/callback`,
+    settingsFile,
+    webDist: webDistRaw === null ? null : path.resolve(REPO_ROOT, webDistRaw),
   };
 }
 

@@ -49,7 +49,7 @@ function notFound(what: string): ApiRequestError {
 export function createMockApi(search: string): ApiClient {
   const params = new URLSearchParams(search);
   const stateParam = params.get('mockState');
-  const state: MockState =
+  let state: MockState =
     stateParam === 'unconfigured' || stateParam === 'offline' ? stateParam : 'ok';
 
   const accounts = createMockAccounts();
@@ -290,13 +290,27 @@ export function createMockApi(search: string): ApiClient {
     getStatus: () =>
       delay(() => {
         guard();
+        const setup = {
+          allowed: state === 'unconfigured',
+          redirectUri: 'http://localhost:8787/api/auth/google/callback',
+          webOrigin: 'http://localhost:8787',
+        };
         return state === 'unconfigured'
           ? {
               configured: false,
               missing: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
               keyringAvailable: true,
+              setup,
             }
-          : { configured: true, missing: [], keyringAvailable: true };
+          : { configured: true, missing: [], keyringAvailable: true, setup };
+      }),
+    saveSetup: (req) =>
+      delay(() => {
+        guard();
+        if (!/\.apps\.googleusercontent\.com$/.test(req.clientId.trim()) || req.clientSecret.trim().length < 8) {
+          throw new ApiRequestError('bad_request', 'Client ID hoặc client secret không hợp lệ (mock).', 400);
+        }
+        state = 'ok';
       }),
 
     listAccounts: () =>

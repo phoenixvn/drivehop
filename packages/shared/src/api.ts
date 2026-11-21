@@ -35,6 +35,8 @@ export const API_PATHS = {
   transferPurgeTrashed: '/api/transfers/:id/purge-trashed',
   /** GET, text/event-stream of SseEvent */
   events: '/api/events',
+  /** POST SetupRequest -> SetupResponse (local app only, see StatusResponse.setup) */
+  setup: '/api/setup',
 } as const;
 
 export type ApiPathKey = keyof typeof API_PATHS;
@@ -58,6 +60,7 @@ export const apiUrl = {
   accountFolderPath: (id: string, folderId: string): string =>
     `/api/accounts/${enc(id)}/folders/${enc(folderId)}/path`,
   transfers: (): string => API_PATHS.transfers,
+  setup: (): string => API_PATHS.setup,
   transfer: (id: string): string => `/api/transfers/${enc(id)}`,
   transferCancel: (id: string): string => `/api/transfers/${enc(id)}/cancel`,
   transferRetryFailed: (id: string): string => `/api/transfers/${enc(id)}/retry-failed`,
@@ -116,6 +119,31 @@ export interface StatusResponse {
   missing: string[];
   /** False when the OS keyring cannot be used and MULTICLOUD_MASTER_KEY is the fallback. */
   keyringAvailable: boolean;
+  /**
+   * Present only when this server lets the web UI save the Google OAuth client (the local app).
+   * Absent on hosts configured another way (the Cloudflare Worker uses secrets).
+   */
+  setup?: SetupInfo;
+}
+
+export interface SetupInfo {
+  /** True when POST /api/setup is accepted now (no account is linked yet). */
+  allowed: boolean;
+  /** Redirect URI to register on the OAuth client, e.g. http://localhost:8787/api/auth/google/callback */
+  redirectUri: string;
+  /** Origin of the web UI, to register as an authorized JavaScript origin if asked. */
+  webOrigin: string;
+}
+
+/** POST /api/setup */
+export interface SetupRequest {
+  clientId: string;
+  clientSecret: string;
+}
+
+/** POST /api/setup. The server restarts right after answering; poll /api/status. */
+export interface SetupResponse {
+  ok: true;
 }
 
 /** GET /api/accounts */

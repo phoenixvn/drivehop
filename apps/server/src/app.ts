@@ -25,6 +25,8 @@ import { authRoutes } from './routes/auth.ts';
 import type { RouteDeps } from './routes/deps.ts';
 import { statusRoutes } from './routes/status.ts';
 import { transferRoutes } from './routes/transfers.ts';
+import { setupRoutes } from './routes/setup.ts';
+import { hasWebBuild, serveWebUi } from './static.ts';
 
 /** Host the server binds to. Local only, never 0.0.0.0. */
 export const LISTEN_HOST = '127.0.0.1';
@@ -59,6 +61,11 @@ export interface BuildServerOptions {
   cancelGraceMs?: number;
   /** Keep-alive interval of GET /api/events. */
   sseKeepAliveMs?: number;
+  /**
+   * Enables the in-app setup screen (POST /api/setup). Called after the Google OAuth client was
+   * saved; the caller closes this server and builds a new one so the client is picked up.
+   */
+  onSetupSaved?: () => void;
 }
 
 export interface BuiltServer {
@@ -105,7 +112,18 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Bui
     });
   const cipher = createTokenCipher(keySource);
   const accounts = createAccountsRepo(db);
-  const getStatus = (): ConfigStatus => buildStatus(config, keySource.keyringAvailable);
+  const onSetupSaved = options.onSetupSaved;
+  const getStatus = (): ConfigStatus => {
+    const status: ConfigStatus = buildStatus(config, keySource.keyringAvailable);
+    if (onSetupSaved !== undefined) {
+      status.setup = {
+        allowed: accounts.list().length === 0,
+        redirectUri: config.redirectUri,
+        webOrigin: config.webOrigin,
+      };
+    }
+    return status;
+  };
 
   let oauth: GoogleOAuth | null;
   if (options.oauth !== undefined) {
@@ -202,7 +220,7 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Bui
     const forbidden = (): FastifyReply =>
       reply
         .status(403)
-        .send({ code: API_ERROR_CODES.badRequest, message: 'Yêu cầu bị từ chối vì không đến từ giao diện MultiCloud.' });
+        .send({ code: API_ERROR_CODES.badRequest, message: 'Yêu cầu bị từ chối vì không đến từ giao diện DriveHop.' });
     const origin = request.headers.origin;
     const safeMethod = request.method === 'GET' || request.method === 'HEAD' || request.method === 'OPTIONS';
     if (!safeMethod && origin !== undefined && origin !== config.webOrigin) return forbidden();
@@ -213,7 +231,12 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Bui
     return undefined;
   });
 
-  app.setNotFoundHandler((_request, reply) => {
+  const webDist = config.webDist !== null && hasWebBuild(config.webDist) ? config.webDist : null;
+  if (config.webDist !== null && webDist === null) {
+    app.log.warn('WEB_DIST is set but contains no index.html: the web UI is not served on this port.');
+  }
+  app.setNotFoundHandler((request, reply) => {
+    if (webDist !== null && serveWebUi(webDist, request, reply)) return;
     send(reply, 404, { code: API_ERROR_CODES.notFound, message: 'Không tìm thấy đường dẫn.' });
   });
 
@@ -277,6 +300,10 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Bui
   await app.register(authRoutes, deps);
   await app.register(accountRoutes, deps);
 
+  if (onSetupSaved !== undefined) {
+    await app.register(setupRoutes, { config, accounts, onSetupSaved });
+  }
+
   await app.register(transferRoutes, {
     engine,
     accounts,
@@ -290,8 +317,10 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Bui
   const status = getStatus();
   if (!status.configured) {
     app.log.warn(
-      `MultiCloud is not configured: missing ${status.missing.join(', ')}. ` +
-        'Set them in the .env file at the repository root (see .env.example) and restart. ' +
+      `DriveHop is not configured: missing ${status.missing.join(', ')}. ` +
+        (onSetupSaved !== undefined
+          ? 'Enter them on the setup screen of the web UI, or set them in the .env file and restart. '
+          : 'Set them in the .env file at the repository root (see .env.example) and restart. ') +
         'Until then every Google feature answers 503 not_configured.',
     );
   }

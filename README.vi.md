@@ -6,7 +6,7 @@ Bảng điều khiển để quản lý nhiều tài khoản Google Drive cùng 
 
 Có hai cách chạy cùng một ứng dụng:
 
-- **Trên máy của bạn (máy chủ Node).** Chỉ nghe ở `127.0.0.1`, dữ liệu nằm trong một tệp SQLite trên máy.
+- **Trên máy của bạn.** Cách nhanh nhất là **bản Windows dựng sẵn** (`DriveHop.exe`, không cần cài Node, xem [mục 4](#4-chạy-cục-bộ-bằng-node)); hoặc chạy máy chủ Node từ mã nguồn. Chỉ nghe ở `127.0.0.1`, dữ liệu nằm trong một tệp SQLite trên máy.
 - **Trên Cloudflare (Worker).** Truy cập qua một tên miền riêng, được Cloudflare Access bảo vệ, việc chuyển tệp chạy nền ngay cả khi bạn đã đóng trình duyệt.
 
 Hai cách dùng chung giao diện web và chung bộ máy chuyển tệp (`packages/core`). Dữ liệu của chúng tách biệt: tài khoản đã liên kết trên máy không tự xuất hiện trên Cloudflare và ngược lại.
@@ -55,7 +55,7 @@ Những việc ứng dụng chưa làm:
 - Chưa hỗ trợ dịch vụ lưu trữ nào khác ngoài Google Drive.
 - Trình duyệt tệp bắt đầu từ "Drive của tôi". Mục "Được chia sẻ với tôi" và bộ nhớ dùng chung (shared drive) không có lối vào riêng.
 - Không tải tệp lên từ máy, không tải tệp về máy, không đổi tên, không tạo thư mục thủ công và không xóa tệp.
-- Máy chủ Node không có chế độ chạy "production": trên máy, ứng dụng luôn được chạy bằng `npm run dev`. Bản chạy thật trên mạng là Worker của Cloudflare.
+- Trên máy, có hai cách chạy: bản Windows dựng sẵn `DriveHop.exe` (tự phục vụ giao diện ở `http://localhost:8787`), hoặc `npm run dev` từ mã nguồn (giao diện chạy bằng Vite). Bản chạy trên mạng là Worker của Cloudflare.
 
 ## 2. Tổng quan kiến trúc
 
@@ -99,6 +99,19 @@ npm --version
 ```
 
 ## 4. Chạy cục bộ bằng Node
+
+### Cách nhanh nhất: bản Windows dựng sẵn
+
+1. Tải `DriveHop-win-x64-v<phiên bản>.zip` ở trang **Releases** của repo, giải nén.
+2. Nhấp đúp `DriveHop.exe`. Windows SmartScreen có thể cảnh báo vì tệp chưa được ký số: bấm **More info** > **Run anyway**.
+3. Một cửa sổ dòng lệnh mở ra và trình duyệt tự mở `http://localhost:8787`. Giữ cửa sổ đó mở trong lúc dùng; đóng nó để tắt DriveHop.
+4. Lần đầu, trang **Thiết lập lần đầu** hướng dẫn tạo OAuth client Google của riêng bạn (giống [mục 5](#5-thiết-lập-google-cloud), redirect URI là `http://localhost:8787/api/auth/google/callback`). Dán Client ID và secret vào form, DriveHop tự khởi động lại và sẵn sàng thêm tài khoản.
+
+Bản dựng sẵn không cần cài Node. Dữ liệu (tài khoản, tác vụ, OAuth client) nằm ở `%LOCALAPPDATA%\DriveHop\data`; khóa mã hóa token nằm trong Windows Credential Manager. Form thiết lập chỉ hiện khi chưa có tài khoản nào: refresh token gắn với OAuth client đã cấp nó, nên đổi client sau khi đã liên kết tài khoản sẽ làm hỏng các tài khoản đó. Muốn đổi client, gỡ hết tài khoản rồi xóa tệp `config.env` trong thư mục dữ liệu.
+
+Tự dựng bản này từ mã nguồn (Windows x64): `npm install` rồi `npm run build:desktop`. Kết quả nằm trong thư mục `release/`.
+
+### Chạy từ mã nguồn
 
 Chạy mọi lệnh ở thư mục gốc của dự án (`DriveHop`).
 

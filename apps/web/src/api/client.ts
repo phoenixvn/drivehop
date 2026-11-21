@@ -21,6 +21,8 @@ import type {
   SseEventType,
   StatusResponse,
   TransferJob,
+  SetupRequest,
+  SetupResponse,
 } from '@multicloud/shared';
 
 /** Local (non-server) error codes produced by the client itself. */
@@ -88,6 +90,11 @@ export interface ApiClient {
    * Only call after the user confirmed it explicitly.
    */
   purgeTrashedSources(id: string): Promise<PurgeTrashedResult>;
+  /**
+   * Saves the Google OAuth client (local app only, when `status.setup.allowed`). The server
+   * restarts right after answering: poll getStatus until it reports `configured`.
+   */
+  saveSetup(req: SetupRequest): Promise<void>;
   /** URL the browser navigates to (full page load) to link or re-link a Google account. */
   authStartUrl(): string;
   /**
@@ -256,6 +263,9 @@ export function createHttpApiClient(): ApiClient {
       (await postJson<CreateTransferResponse>(apiUrl.transfers(), req)).job,
     cancelTransfer: async (id) =>
       (await postJson<CancelTransferResponse>(apiUrl.transferCancel(id))).job,
+    saveSetup: async (req) => {
+      await postJson<SetupResponse>(apiUrl.setup(), req);
+    },
     retryFailedTransfer: async (id) =>
       (await postJson<RetryFailedTransferResponse>(apiUrl.transferRetryFailed(id))).job,
     purgeTrashedSources: (id) =>
