@@ -22,15 +22,7 @@ Keep clear space around the logo of at least a quarter of its width. Don't recol
 
 The screenshots in `../media/` and in `social-preview.png` come from demo mode (`?mock=1&demo=1`), so none of the accounts or files in them are real.
 
-## Turning on donations
+## Donations
 
-The donate buttons are ready in both READMEs, commented out until the accounts exist.
-
-1. **GitHub Sponsors** (0% fee, available in Vietnam): <https://github.com/sponsors/accounts> → *Join the waitlist* for `phoenixvn`, fill in the profile, payout (bank account via Stripe) and tax form. Approval usually takes a few days.
-2. **Ko-fi** (0% fee on one-off donations, payouts via PayPal or Stripe): sign up at <https://ko-fi.com>, pick a page name, connect PayPal.
-3. Then:
-   - in `.github/FUNDING.yml`, uncomment `github:` and `ko_fi:` (this adds the **Sponsor** button on the repo page);
-   - in `README.md` and `README.vi.md`, replace `KOFI_NAME` and delete the `<!-- DONATE` and `END DONATE -->` lines;
-   - drop any button whose account you didn't create.
-
-The in-app footer link (*Support DriveHop*) points at the README's [Support section](../../README.md#support-drivehop), so it never needs to change.
+- **Buy Me a Coffee:** <https://buymeacoffee.com/datngo2994>. Linked from the repo's *Sponsor* button (`.github/FUNDING.yml`), both READMEs and the app footer.
+- **GitHub Sponsors** (optional, 0% fee): once approved, add `github: [phoenixvn]` to `.github/FUNDING.yml` and a Sponsors badge next to the coffee button.

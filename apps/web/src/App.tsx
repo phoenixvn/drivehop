@@ -14,6 +14,7 @@ import { MODE_LABELS, authErrorText } from './lib/format.ts';
 import { LANGS, lang, strings, switchLang } from './lib/i18n.ts';
 
 const REPO_URL = 'https://github.com/phoenixvn/drivehop';
+const DONATE_URL = 'https://buymeacoffee.com/datngo2994';
 
 const S = strings({
   en: {
@@ -40,7 +41,7 @@ const S = strings({
     langNames: { en: 'English', vi: 'Vietnamese' },
     footer: 'DriveHop is free and open source.',
     star: 'Star on GitHub',
-    support: 'Support DriveHop',
+    support: 'Buy me a coffee',
     reportBug: 'Report a bug',
   },
   vi: {
@@ -68,7 +69,7 @@ const S = strings({
     langNames: { en: 'Tiếng Anh', vi: 'Tiếng Việt' },
     footer: 'DriveHop miễn phí và mã nguồn mở.',
     star: 'Gắn sao trên GitHub',
-    support: 'Ủng hộ DriveHop',
+    support: 'Mời mình ly cà phê',
     reportBug: 'Báo lỗi',
   },
 });
@@ -345,11 +346,11 @@ export function App() {
         </a>
         <a
           className="app__footer-support"
-          href={`${REPO_URL}#support-drivehop`}
+          href={DONATE_URL}
           target="_blank"
           rel="noopener noreferrer"
         >
-          <span aria-hidden="true">♥ </span>
+          <span aria-hidden="true">☕ </span>
           {S.support}
         </a>
         <a href={`${REPO_URL}/issues/new/choose`} target="_blank" rel="noopener noreferrer">

@@ -18,7 +18,7 @@ Free, open source, one double-click on Windows.
   <img src="https://img.shields.io/badge/Windows-x64-0078D6?style=flat-square&logo=windows" alt="Windows x64">
 </p>
 
-**[⬇ Download for Windows](https://github.com/phoenixvn/drivehop/releases/latest)** · [Quick start](#quick-start) · [FAQ](#faq) · [Report a bug](https://github.com/phoenixvn/drivehop/issues/new/choose) · [Discussions](https://github.com/phoenixvn/drivehop/discussions) · [♥ Support](#support-drivehop)
+**[⬇ Download for Windows](https://github.com/phoenixvn/drivehop/releases/latest)** · [Quick start](#quick-start) · [FAQ](#faq) · [Report a bug](https://github.com/phoenixvn/drivehop/issues/new/choose) · [Discussions](https://github.com/phoenixvn/drivehop/discussions) · [☕ Buy me a coffee](https://buymeacoffee.com/datngo2994)
 
 **English** · [Tiếng Việt](README.vi.md)
 
@@ -166,13 +166,11 @@ DriveHop is built and maintained by one person in their spare time. If it saved 
 
 - **⭐ Star the repo.** It is free and helps other people find DriveHop.
 - **Tell a friend** whose Google Drive is full, or share it in your community.
+- **☕ Buy me a coffee:** a one-off tip goes straight to development.
 
-<!-- DONATE: remove this comment line and the matching end line once the accounts exist (see docs/brand/README.md).
 <p>
-  <a href="https://github.com/sponsors/phoenixvn"><img src="https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor on GitHub"></a>
-  <a href="https://ko-fi.com/KOFI_NAME"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-Ko--fi-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white" alt="Buy me a coffee on Ko-fi"></a>
+  <a href="https://buymeacoffee.com/datngo2994"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
 </p>
-END DONATE -->
 
 ### Sponsors
 
