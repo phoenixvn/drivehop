@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/logo.svg" alt="DriveHop" width="72" height="72">
+<img src="docs/logo.svg" alt="DriveHop logo" width="88" height="88">
 
 # DriveHop
 
@@ -18,7 +18,7 @@ Free, open source, one double-click on Windows.
   <img src="https://img.shields.io/badge/Windows-x64-0078D6?style=flat-square&logo=windows" alt="Windows x64">
 </p>
 
-**[⬇ Download for Windows](https://github.com/phoenixvn/drivehop/releases/latest)** · [Quick start](#quick-start) · [FAQ](#faq) · [Report a bug](https://github.com/phoenixvn/drivehop/issues/new/choose) · [Discussions](https://github.com/phoenixvn/drivehop/discussions)
+**[⬇ Download for Windows](https://github.com/phoenixvn/drivehop/releases/latest)** · [Quick start](#quick-start) · [FAQ](#faq) · [Report a bug](https://github.com/phoenixvn/drivehop/issues/new/choose) · [Discussions](https://github.com/phoenixvn/drivehop/discussions) · [♥ Support](#support-drivehop)
 
 **English** · [Tiếng Việt](README.vi.md)
 
@@ -160,9 +160,21 @@ Run it from source today (Node.js ≥ 22.12). Prebuilt apps for other platforms 
 
 </details>
 
-## Sponsors ❤️
+## Support DriveHop
 
-DriveHop is built and maintained by one person in their spare time. Sponsors keep it free for everyone.
+DriveHop is built and maintained by one person in their spare time. If it saved you from paying for extra storage, you can help keep it free:
+
+- **⭐ Star the repo.** It is free and helps other people find DriveHop.
+- **Tell a friend** whose Google Drive is full, or share it in your community.
+
+<!-- DONATE: remove this comment line and the matching end line once the accounts exist (see docs/brand/README.md).
+<p>
+  <a href="https://github.com/sponsors/phoenixvn"><img src="https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor on GitHub"></a>
+  <a href="https://ko-fi.com/KOFI_NAME"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-Ko--fi-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white" alt="Buy me a coffee on Ko-fi"></a>
+</p>
+END DONATE -->
+
+### Sponsors
 
 <table>
 <tr>
@@ -175,10 +187,6 @@ DriveHop is built and maintained by one person in their spare time. Sponsors kee
 </td>
 </tr>
 </table>
-
-<!-- Donation links: uncomment once the accounts exist.
-**Support the project:** [GitHub Sponsors](https://github.com/sponsors/phoenixvn) · [Ko-fi](https://ko-fi.com/YOUR_NAME)
--->
 
 ## Contributing
 

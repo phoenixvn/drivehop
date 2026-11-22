@@ -1317,4 +1317,11 @@ Chưa đối chiếu được, hoặc còn chưa chắc:
 
 Nếu DriveHop giúp bạn khỏi phải mua thêm dung lượng, hãy tặng repo một ⭐ để người khác dễ tìm thấy. Muốn tài trợ (đặt logo trong README)? [Liên hệ ở đây](https://github.com/phoenixvn/drivehop/issues/new?template=sponsorship.yml).
 
+<!-- DONATE: bỏ dòng này và dòng kết thúc khi đã có tài khoản (xem docs/brand/README.md).
+<p>
+  <a href="https://github.com/sponsors/phoenixvn"><img src="https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Tài trợ trên GitHub"></a>
+  <a href="https://ko-fi.com/KOFI_NAME"><img src="https://img.shields.io/badge/Mời%20cà%20phê-Ko--fi-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white" alt="Mời cà phê qua Ko-fi"></a>
+</p>
+END DONATE -->
+
 [![Star History Chart](https://api.star-history.com/svg?repos=phoenixvn/drivehop&type=Date)](https://star-history.com/#phoenixvn/drivehop&Date)

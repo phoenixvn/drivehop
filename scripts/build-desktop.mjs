@@ -16,6 +16,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
+import * as ResEdit from 'resedit';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const VERSION = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
@@ -45,6 +46,42 @@ const BANNER = `var require = (function (r) {
   return r;
 })(require);
 var __drivehop_import_meta_url = require('node:url').pathToFileURL(process.execPath).href;`;
+
+/**
+ * Gives the copied node.exe DriveHop's icon and version info (what Explorer, the taskbar and
+ * SmartScreen show). Must run before postject injects the app blob.
+ */
+function brandExe(file) {
+  const exe = ResEdit.NtExecutable.from(readFileSync(file), { ignoreCert: true });
+  const res = ResEdit.NtExecutableResource.from(exe);
+  const icon = ResEdit.Data.IconFile.from(readFileSync(path.join(ROOT, 'docs', 'brand', 'drivehop.ico')));
+  const group = res.entries.find((entry) => entry.type === 14);
+  ResEdit.Resource.IconGroupEntry.replaceIconsForResource(
+    res.entries,
+    group?.id ?? 1,
+    group?.lang ?? 1033,
+    icon.icons.map((item) => item.data),
+  );
+  const info = ResEdit.Resource.VersionInfo.fromEntries(res.entries)[0];
+  const [major, minor, patch] = VERSION.split(/[.-]/).map((part) => Number.parseInt(part, 10) || 0);
+  info.setFileVersion(major, minor, patch, 0, 1033);
+  info.setProductVersion(major, minor, patch, 0, 1033);
+  for (const lang of info.getAllLanguagesForStringValues()) {
+    info.setStringValues(lang, {
+      CompanyName: 'DriveHop contributors',
+      ProductName: 'DriveHop',
+      FileDescription: 'DriveHop - move files between your Google Drive accounts',
+      FileVersion: VERSION,
+      ProductVersion: VERSION,
+      OriginalFilename: 'DriveHop.exe',
+      InternalName: 'DriveHop',
+      LegalCopyright: `MIT License. Includes Node.js ${process.version} (MIT).`,
+    });
+  }
+  info.outputToResourceEntries(res.entries);
+  res.outputResource(exe);
+  writeFileSync(file, Buffer.from(exe.generate()));
+}
 
 function step(message) {
   console.log(`\n== ${message}`);
@@ -101,6 +138,7 @@ writeFileSync(
 run(process.execPath, ['--experimental-sea-config', seaConfig], { shell: false });
 const exe = path.join(OUT, 'DriveHop.exe');
 cpSync(process.execPath, exe);
+brandExe(exe);
 run(
   process.execPath,
   [

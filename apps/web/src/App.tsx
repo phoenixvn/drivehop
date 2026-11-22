@@ -13,6 +13,8 @@ import { useTransfers } from './hooks/useTransfers.ts';
 import { MODE_LABELS, authErrorText } from './lib/format.ts';
 import { LANGS, lang, strings, switchLang } from './lib/i18n.ts';
 
+const REPO_URL = 'https://github.com/phoenixvn/drivehop';
+
 const S = strings({
   en: {
     connected: 'Google account connected.',
@@ -36,6 +38,10 @@ const S = strings({
     connecting: 'Connecting to the DriveHop server…',
     language: 'Language',
     langNames: { en: 'English', vi: 'Vietnamese' },
+    footer: 'DriveHop is free and open source.',
+    star: 'Star on GitHub',
+    support: 'Support DriveHop',
+    reportBug: 'Report a bug',
   },
   vi: {
     connected: 'Đã kết nối tài khoản Google thành công.',
@@ -60,6 +66,10 @@ const S = strings({
     connecting: 'Đang kết nối máy chủ DriveHop…',
     language: 'Ngôn ngữ',
     langNames: { en: 'Tiếng Anh', vi: 'Tiếng Việt' },
+    footer: 'DriveHop miễn phí và mã nguồn mở.',
+    star: 'Gắn sao trên GitHub',
+    support: 'Ủng hộ DriveHop',
+    reportBug: 'Báo lỗi',
   },
 });
 
@@ -327,6 +337,25 @@ export function App() {
           </>
         )}
       </main>
+      <footer className="app__footer">
+        <span>{S.footer}</span>
+        <a href={`${REPO_URL}/stargazers`} target="_blank" rel="noopener noreferrer">
+          <span aria-hidden="true">★ </span>
+          {S.star}
+        </a>
+        <a
+          className="app__footer-support"
+          href={`${REPO_URL}#support-drivehop`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span aria-hidden="true">♥ </span>
+          {S.support}
+        </a>
+        <a href={`${REPO_URL}/issues/new/choose`} target="_blank" rel="noopener noreferrer">
+          {S.reportBug}
+        </a>
+      </footer>
 
       <div id="transfers-drawer">
         {drawerOpen && (

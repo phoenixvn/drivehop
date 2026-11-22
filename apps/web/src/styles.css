@@ -332,7 +332,8 @@ input[type='checkbox'] {
 }
 
 @media (min-width: 1280px) {
-  .app--drawer .app__main {
+  .app--drawer .app__main,
+  .app--drawer .app__footer {
     margin-right: var(--drawer-width);
   }
 }
@@ -1619,4 +1620,38 @@ h2 {
   font-weight: 600;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+}
+
+/* Footer: project links (star, support, bug report). */
+.app__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 18px;
+  padding: 18px 16px 24px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.app__footer a {
+  color: var(--muted);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.app__footer a:hover,
+.app__footer a:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.app__footer .app__footer-support {
+  color: #db2777;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__footer .app__footer-support {
+    color: #f472b6;
+  }
 }

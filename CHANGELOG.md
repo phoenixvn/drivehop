@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- `DriveHop.exe` now has the DriveHop icon and version info (name shown in Explorer, the taskbar and SmartScreen).
+- Footer links in the app: star on GitHub, support the project, report a bug.
+- Brand kit in `docs/brand/`: app icon (PNG and ICO), wordmarks, 1280×640 social preview.
+- README: "Support DriveHop" section, with donate buttons ready to switch on.
+
 ## v0.2.0 (2026-11-21)
 
 - **English UI.** The app is now in English and Vietnamese: it follows your browser language, and an EN | VI switch sits in the header. Messages from the local server are in English.
